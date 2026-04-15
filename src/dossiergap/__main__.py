@@ -39,8 +39,25 @@ def main(argv: list[str] | None = None) -> int:
         return preflight.main()
 
     if args.command == "extract":
-        print("extract: not yet implemented (Task 12)", file=sys.stderr)
-        return 2
+        from pathlib import Path
+        from dossiergap.corpus import load_corpus
+        from dossiergap.pipeline import run_pipeline
+
+        corpus_path = Path(args.corpus)
+        out_path = Path(args.out)
+        entries = load_corpus(corpus_path)
+        # Default cache dir sits alongside the corpus unless CACHE_DIR env overrides.
+        import os
+        cache_env = os.environ.get("DOSSIERGAP_CACHE_DIR")
+        cache_dir = Path(cache_env) if cache_env else corpus_path.resolve().parent.parent / "cache"
+        _, failures = run_pipeline(
+            entries,
+            cache_dir=cache_dir,
+            out_path=out_path,
+            limit=args.limit,
+            continue_on_error=args.continue_on_error,
+        )
+        return 1 if failures and not args.continue_on_error else 0
 
     parser.error(f"unknown command: {args.command}")
     return 2

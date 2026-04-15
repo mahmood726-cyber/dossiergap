@@ -34,6 +34,8 @@ class CorpusEntry(BaseModel):
     ema_procedure_number: str | None = None
     ema_approval_date: date | None = None
     cv_indication: str = Field(min_length=2)
+    fda_medical_review_url: str | None = None  # hand-seeded until Task 3.5 URL discovery
+    ema_epar_url: str | None = None            # hand-seeded until Task 4.5 URL discovery
     notes: str = ""
 
     @field_validator("fda_application_number")

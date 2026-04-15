@@ -90,12 +90,17 @@ def test_fallback_rejects_different_drug_inn():
     assert len(groups) == 2
 
 
-def test_fallback_rejects_different_phase():
+def test_fallback_phase_mismatch_merges_in_phase1():
+    """Phase 1 composite key is relaxed: (sponsor + drug + N) only. Phase
+    is not part of the key because EMA efficacy sections cite supporting
+    Phase-2 studies that confuse phase extraction. The phase mismatch
+    appears as a conflict in the merged DedupGroup instead."""
     a = _rec(source="FDA", nct_id=None, trial_phase="3")
     b = _rec(source="EMA", dossier_id="EMEA/H/C/999999", nct_id=None,
              trial_phase="2")
     groups = dedup_trials([a, b])
-    assert len(groups) == 2
+    assert len(groups) == 1
+    assert "trial_phase" in groups[0].conflicts
 
 
 def test_fallback_accepts_n_within_5_percent():
@@ -115,21 +120,21 @@ def test_fallback_rejects_n_beyond_5_percent():
     assert len(groups) == 2
 
 
-def test_fallback_outcome_substring_match():
-    """FDA and EMA may phrase the primary outcome slightly differently."""
+def test_fallback_outcome_mismatch_merges_in_phase1():
+    """Phase 1 composite key no longer includes primary_outcome — outcomes
+    diverge between FDA narrative and EMA table text. Any outcome difference
+    surfaces as a conflict in the merged DedupGroup instead."""
     a = _rec(
         source="FDA", nct_id=None,
         primary_outcome="cardiovascular death or first HF hospitalization",
     )
     b = _rec(
         source="EMA", dossier_id="EMEA/H/C/999999", nct_id=None,
-        primary_outcome="CV death or first HF hospitalization",
+        primary_outcome="completely different text here",
     )
     groups = dedup_trials([a, b])
-    # "CV death or first HF hospitalization" is a substring of the FDA wording
-    # (after normalising CV/cardiovascular — handled by extractor). Without
-    # that, strict substring match fails; plain substring is the bar here.
-    assert len(groups) == 1 or len(groups) == 2  # document either outcome
+    assert len(groups) == 1
+    assert "primary_outcome" in groups[0].conflicts
 
 
 # -- conflict detection ------------------------------------------------------

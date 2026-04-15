@@ -80,22 +80,28 @@ def _outcome_substring_match(a: str, b: str) -> bool:
 
 
 def _are_same_trial(a: TrialRecord, b: TrialRecord) -> bool:
+    """Decide whether two records describe the same underlying trial.
+
+    Primary key: NCT match (overrides everything else).
+
+    Fallback composite key for Phase 1: (sponsor first-word, drug INN,
+    N ± 5%). Phase and primary-outcome text are DELIBERATELY NOT part
+    of the composite key — they diverge too often between FDA narrative
+    and EMA table text (EMA efficacy sections cite supporting Phase 2
+    trials; pdfplumber table-linearisation leaks subgroup-outcome
+    phrasing into what should be the primary outcome). Strengthening
+    this is deferred to Task 12.5.
+    """
     # Primary key: NCT match (overrides everything else).
     if a.nct_id and b.nct_id:
         return a.nct_id == b.nct_id
 
-    # Fallback composite key.
+    # Fallback composite key — relaxed in Phase 1.
     if a.sponsor.lower().split()[0] != b.sponsor.lower().split()[0]:
-        # Compare only the first word of sponsor to tolerate "Novartis" vs
-        # "Novartis Pharma AG". Good-enough heuristic for Phase 1.
         return False
     if a.drug_inn.lower() != b.drug_inn.lower():
         return False
-    if a.trial_phase != b.trial_phase:
-        return False
     if not _n_within_tolerance(a.n_randomized, b.n_randomized):
-        return False
-    if not _outcome_substring_match(a.primary_outcome, b.primary_outcome):
         return False
     return True
 

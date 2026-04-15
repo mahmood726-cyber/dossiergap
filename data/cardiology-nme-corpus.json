@@ -8,7 +8,9 @@
     "ema_procedure_number": "EMEA/H/C/004062",
     "ema_approval_date": "2015-11-19",
     "cv_indication": "HFrEF",
-    "notes": "Seed entry, high-confidence. PARADIGM-HF pivotal."
+    "fda_medical_review_url": "https://www.accessdata.fda.gov/drugsatfda_docs/nda/2015/207620Orig1s000MedR.pdf",
+    "ema_epar_url": "https://www.ema.europa.eu/en/documents/assessment-report/entresto-epar-public-assessment-report_en.pdf",
+    "notes": "Seed entry, high-confidence. PARADIGM-HF pivotal. URLs hand-seeded until Task 3.5/4.5 URL discovery."
   },
   {
     "drug_inn": "ivabradine",
