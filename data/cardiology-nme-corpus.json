@@ -54,7 +54,9 @@
     "ema_procedure_number": "EMEA/H/C/003774",
     "ema_approval_date": "2016-05-12",
     "cv_indication": "PAH",
-    "notes": "GRIPHON pivotal."
+    "fda_medical_review_url": "https://www.accessdata.fda.gov/drugsatfda_docs/nda/2015/207947Orig1s000MedR.pdf",
+    "ema_epar_url": "https://www.ema.europa.eu/en/documents/assessment-report/uptravi-epar-public-assessment-report_en.pdf",
+    "notes": "GRIPHON pivotal. URLs hand-seeded for Task 14 smoke."
   },
   {
     "drug_inn": "edoxaban",
@@ -87,7 +89,9 @@
     "ema_procedure_number": "EMEA/H/C/004829",
     "ema_approval_date": "2020-04-01",
     "cv_indication": "Dyslipidemia",
-    "notes": "CLEAR Outcomes published 2023 post-approval."
+    "fda_medical_review_url": "https://www.accessdata.fda.gov/drugsatfda_docs/nda/2020/211616Orig1s000OtherR.pdf",
+    "ema_epar_url": "https://www.ema.europa.eu/en/documents/assessment-report/nilemdo-epar-public-assessment-report_en.pdf",
+    "notes": "CLEAR Outcomes published 2023 post-approval. EU brand is Nilemdo. URLs hand-seeded for Task 14 smoke."
   },
   {
     "drug_inn": "dapagliflozin",
@@ -131,7 +135,9 @@
     "ema_procedure_number": "EMEA/H/C/005325",
     "ema_approval_date": "2021-07-16",
     "cv_indication": "HFrEF (worsening)",
-    "notes": "VICTORIA pivotal."
+    "fda_medical_review_url": "https://www.accessdata.fda.gov/drugsatfda_docs/nda/2021/214377Orig1s000OtherR.pdf",
+    "ema_epar_url": "https://www.ema.europa.eu/en/documents/assessment-report/verquvo-epar-public-assessment-report_en.pdf",
+    "notes": "VICTORIA pivotal. URLs hand-seeded for Task 14 smoke."
   },
   {
     "drug_inn": "finerenone",
@@ -153,7 +159,9 @@
     "ema_procedure_number": "EMEA/H/C/005459",
     "ema_approval_date": "2023-06-30",
     "cv_indication": "Obstructive HCM",
-    "notes": "EXPLORER-HCM pivotal."
+    "fda_medical_review_url": "https://www.accessdata.fda.gov/drugsatfda_docs/nda/2022/214998Orig1s000OtherR.pdf",
+    "ema_epar_url": "https://www.ema.europa.eu/en/documents/assessment-report/camzyos-epar-public-assessment-report_en.pdf",
+    "notes": "EXPLORER-HCM pivotal. URLs hand-seeded for Task 14 smoke."
   },
   {
     "drug_inn": "empagliflozin",
