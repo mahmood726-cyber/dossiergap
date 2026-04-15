@@ -35,11 +35,13 @@ from ._common_extract import (
     is_strict_pivotal,
 )
 
-# FDA narrative format: "HR 0.80; 95% CI 0.73, 0.87" or "HR 0.75 (95% CI 0.60-0.90)".
+# FDA narrative format. Accepts 90/95/97.5/99 % CI — some FDA reviews
+# quote 97.5% (two-sided from one-sided alpha = 0.025) or 99% (GRIPHON-
+# style alpha-spending designs). 95% is overwhelmingly the default.
 _HR_CI_RE = re.compile(
     r"\bHR\b[^\d]{0,10}(\d+\.\d+)"
     r"[^0-9.]{1,30}?"
-    r"95\s*%?\s*CI[:\s]*"
+    r"(?:90|95|97\.?5|99)\s*%?\s*CI[:\s]*"
     r"(\d+\.\d+)"
     r"\s*[,\-–]\s*"
     r"(\d+\.\d+)",

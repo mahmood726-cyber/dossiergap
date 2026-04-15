@@ -1,9 +1,9 @@
 # DossierGap Phase 1 — Task 14 Extraction Audit
 
-**Run date**: 2026-04-15
+**Run dates**: 2026-04-15 (initial), 2026-04-15 (re-run after HR-regex widening)
 **Corpus**: `data/cardiology-nme-corpus.json` (20 NMEs, 2015–2024 approvals)
 **CLI invocation**: `python -m dossiergap extract --corpus data/cardiology-nme-corpus.json --out outputs/dossier_trials.v0.1.0.csv --limit 20 --continue-on-error`
-**Output CSV**: `outputs/dossier_trials.v0.1.0.csv` (2 rows)
+**Output CSV**: `outputs/dossier_trials.v0.1.0.csv` (3 rows after CI-level regex widening; 2 rows on first run)
 
 ---
 
@@ -14,8 +14,8 @@
 | NMEs in corpus | 20 |
 | NMEs with hand-seeded URLs (both sources where applicable) | 5 |
 | Source-pairs attempted (FDA + EMA) | 10 |
-| Source-pairs successfully extracted | 3 |
-| Unique trials in output CSV after dedup | 2 |
+| Source-pairs successfully extracted | 4 (was 3 before CI-regex widening) |
+| Unique trials in output CSV after dedup | 3 (was 2) |
 
 The **Phase 1 ship criterion of ≤5 % hand-audit drift** was set against a denominator of "extracted trials". With only 2 trials successfully extracted from a 5-NME smoke subset, the criterion is not meaningfully testable yet — the audit below focuses on *what succeeded* and *why the failures failed*, not on drift rate.
 
@@ -36,9 +36,15 @@ The **Phase 1 ship criterion of ≤5 % hand-audit drift** was set against a deno
 - **FDA NDA 214377** → section detection failed (see Failures below).
 - **Ground truth** (VICTORIA NEJM 2020): HR 0.90, 95% CI 0.81–0.99 for CV death or first HF hospitalization, N=5050. **HR and CI match within 0.01. N differs significantly (1807 vs 5050) — extractor pulled a subgroup or a different trial's N. Flagged.**
 
+### 3. Uptravi (selexipag, PAH) — GRIPHON (added after CI-regex widening)
+
+- **EMA EMEA/H/C/003774** → extracted HR 0.67, 99% CI 0.46–0.98, N=1150. Pages 45, 51, 60, 72.
+- **FDA NDA 207947** → section detection found a narrow range (p.145–147) but N extraction failed there (section too small to contain the N narrative).
+- **Ground truth** (GRIPHON NEJM 2015): primary composite (morbidity/mortality) HR 0.60, 99% CI 0.46–0.78, N=1156. **Extracted HR 0.67 is a secondary endpoint value, not the primary composite.** N is close (1150 vs 1156). Published primary HR 0.60 would require primary-outcome-proximity scoring in the extractor (Phase 2).
+
 ---
 
-## Failed (7 source-pairs)
+## Failed (6 source-pairs after re-run; was 7 on first run)
 
 | NME | Source | Failure | Root cause |
 |---|---|---|---|

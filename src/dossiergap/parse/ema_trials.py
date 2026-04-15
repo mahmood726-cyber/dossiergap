@@ -34,22 +34,25 @@ from ._common_extract import (
 )
 
 # Table format: "Hazard ratio <est>" followed (possibly across line
-# breaks and neighbouring table cells) by "95%-CI <low>, <high>".
+# breaks and neighbouring table cells) by "<ci-level>%-CI <low>, <high>".
+# CI level parameterised so alpha-adjusted trials (e.g. GRIPHON's 99%) match.
 _HR_CI_TABLE_RE = re.compile(
     r"Hazard\s+ratio\s+(\d+\.\d+)"
     r"[^\d]{0,200}?"
-    r"95\s*%\s*-?\s*CI[:,\s]*"
+    r"(?:90|95|97\.?5|99)\s*%\s*-?\s*CI[:,\s]*"
     r"(\d+\.\d+)"
     r"\s*(?:,\s*|\s+to\s+|\s*[-–]\s*)"
     r"(\d+\.\d+)",
     re.IGNORECASE | re.DOTALL,
 )
 
-# Narrative format (shared with FDA style): "HR 0.80; 95% CI 0.73, 0.87".
+# Narrative format — either "HR 0.80; 95% CI 0.73, 0.87" or the full
+# "Hazard ratio 0.80 (95% CI 0.73, 0.87)" phrasing EMA often uses in
+# prose (not just in tables). Accepts 90/95/97.5/99 % CI.
 _HR_CI_NARRATIVE_RE = re.compile(
-    r"\bHR\b[^\d]{0,10}(\d+\.\d+)"
+    r"(?:\bHR\b|Hazard\s+ratio)[^\d]{0,10}(\d+\.\d+)"
     r"[^0-9.]{1,30}?"
-    r"95\s*%?\s*CI[:\s]*"
+    r"(?:90|95|97\.?5|99)\s*%?\s*CI[:\s]*"
     r"(\d+\.\d+)"
     r"\s*[,\-–]\s*"
     r"(\d+\.\d+)",
