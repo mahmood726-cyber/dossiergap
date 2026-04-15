@@ -5,16 +5,11 @@ end-to-end `main()` is tested for exit-code behaviour only.
 """
 from __future__ import annotations
 
-import sys
-from pathlib import Path
 from unittest import mock
 
 import pytest
 
-SCRIPTS_DIR = Path(__file__).resolve().parents[1] / "scripts"
-sys.path.insert(0, str(SCRIPTS_DIR))
-
-import preflight  # noqa: E402
+import preflight  # path added via pyproject [tool.pytest.ini_options] pythonpath
 
 
 # -- check_python_version -----------------------------------------------------
