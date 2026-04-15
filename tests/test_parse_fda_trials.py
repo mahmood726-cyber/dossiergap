@@ -144,6 +144,24 @@ def test_rejects_tiny_n_as_noise():
     assert r.n_randomized == 8442  # not 4
 
 
+def test_rejects_not_randomized_count():
+    """Regression guard for Verquvo VICTORIA EPAR: a 'Not Randomized 1,807'
+    table row must not be picked up as the trial N. Fix discovered 2026-04-15
+    when re-auditing Task 14 output."""
+    text = (
+        "Review of Efficacy: Trial TEST-NAME Phase 3 pivotal study. "
+        "Disposition of subjects. Not Randomized 1,807 "
+        "Then 9,999 patients were randomized to treatment. "
+        "The primary endpoint was all-cause mortality. "
+        "HR 0.80; 95% CI 0.73, 0.87."
+    )
+    pages = {1: text}
+    r = extract_primary_trial(pages, **META)
+    assert r.n_randomized == 9999, (
+        "negation-preceded N count was incorrectly extracted"
+    )
+
+
 # -- effect-value parsing edge cases -----------------------------------------
 
 def test_parses_hr_with_comma_separated_ci():

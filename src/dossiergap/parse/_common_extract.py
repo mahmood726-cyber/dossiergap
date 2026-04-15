@@ -83,9 +83,23 @@ def extract_trial_name(pages: dict[int, str]) -> tuple[str, int]:
     return name, first_page[name]
 
 
+_NEGATION_PREFIX_RE = re.compile(r"\b(?:not|non|never)[\s-]+$", re.IGNORECASE)
+
+
 def extract_n_randomized(pages: dict[int, str]) -> tuple[int, int]:
+    """Find the first plausible N randomized (>= 100), skipping negated matches.
+
+    FDA/EMA tables sometimes include a 'Not Randomized' row listing the count
+    of subjects excluded from randomisation — e.g. Verquvo VICTORIA EPAR
+    reports 'Not Randomized 1,807' immediately before 'Subjects in population
+    ... 5,050'. Matches preceded by 'not'/'non'/'never' within 30 chars are
+    skipped to avoid extracting the wrong count.
+    """
     hits = find_all(N_RANDOMIZED_RE, pages)
     for pnum, m in hits:
+        prefix = pages[pnum][max(0, m.start() - 30):m.start()]
+        if _NEGATION_PREFIX_RE.search(prefix):
+            continue
         n_str = m.group("n_before") or m.group("n_after")
         n = int(n_str.replace(",", ""))
         if n >= 100:
@@ -93,7 +107,8 @@ def extract_n_randomized(pages: dict[int, str]) -> tuple[int, int]:
     raise ExtractionError(
         "could not extract N randomized: no match for pattern "
         "'(\\d+) (subjects|patients|participants) (were )?randomized' or "
-        "'randomized (\\d+) (subjects|patients|participants)' with N >= 100"
+        "'randomized (\\d+) (subjects|patients|participants)' with N >= 100 "
+        "(negated matches like 'Not Randomized N' are deliberately skipped)"
     )
 
 
