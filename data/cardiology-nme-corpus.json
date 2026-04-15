@@ -1,0 +1,222 @@
+[
+  {
+    "drug_inn": "sacubitril/valsartan",
+    "brand_us": "Entresto",
+    "fda_application_number": "207620",
+    "fda_approval_type": "NDA",
+    "fda_approval_date": "2015-07-07",
+    "ema_procedure_number": "EMEA/H/C/004062",
+    "ema_approval_date": "2015-11-19",
+    "cv_indication": "HFrEF",
+    "notes": "Seed entry, high-confidence. PARADIGM-HF pivotal."
+  },
+  {
+    "drug_inn": "ivabradine",
+    "brand_us": "Corlanor",
+    "fda_application_number": "206143",
+    "fda_approval_type": "NDA",
+    "fda_approval_date": "2015-04-15",
+    "ema_procedure_number": null,
+    "ema_approval_date": null,
+    "cv_indication": "HFrEF",
+    "notes": "US 2015 approval is the analytical unit; EU earlier as Procoralan (pre-2015 scope)."
+  },
+  {
+    "drug_inn": "alirocumab",
+    "brand_us": "Praluent",
+    "fda_application_number": "125559",
+    "fda_approval_type": "BLA",
+    "fda_approval_date": "2015-07-24",
+    "ema_procedure_number": "EMEA/H/C/003882",
+    "ema_approval_date": "2015-09-23",
+    "cv_indication": "Dyslipidemia (PCSK9)",
+    "notes": "ODYSSEY program; CV outcome added later via ODYSSEY OUTCOMES."
+  },
+  {
+    "drug_inn": "evolocumab",
+    "brand_us": "Repatha",
+    "fda_application_number": "125522",
+    "fda_approval_type": "BLA",
+    "fda_approval_date": "2015-08-27",
+    "ema_procedure_number": "EMEA/H/C/003766",
+    "ema_approval_date": "2015-07-17",
+    "cv_indication": "Dyslipidemia (PCSK9)",
+    "notes": "FOURIER CV outcomes trial published 2017."
+  },
+  {
+    "drug_inn": "selexipag",
+    "brand_us": "Uptravi",
+    "fda_application_number": "207947",
+    "fda_approval_type": "NDA",
+    "fda_approval_date": "2015-12-22",
+    "ema_procedure_number": "EMEA/H/C/003774",
+    "ema_approval_date": "2016-05-12",
+    "cv_indication": "PAH",
+    "notes": "GRIPHON pivotal."
+  },
+  {
+    "drug_inn": "edoxaban",
+    "brand_us": "Savaysa",
+    "fda_application_number": "206316",
+    "fda_approval_type": "NDA",
+    "fda_approval_date": "2015-01-08",
+    "ema_procedure_number": "EMEA/H/C/002629",
+    "ema_approval_date": "2015-06-19",
+    "cv_indication": "AF (stroke prevention)",
+    "notes": "ENGAGE AF-TIMI 48 pivotal."
+  },
+  {
+    "drug_inn": "tafamidis",
+    "brand_us": "Vyndaqel",
+    "fda_application_number": "211996",
+    "fda_approval_type": "NDA",
+    "fda_approval_date": "2019-05-03",
+    "ema_procedure_number": "EMEA/H/C/002294",
+    "ema_approval_date": null,
+    "cv_indication": "ATTR-CM",
+    "notes": "ATTR-ACT pivotal. EU earlier for hATTR polyneuropathy (different indication, out of Phase 1 scope); CM indication is the Phase 1 unit."
+  },
+  {
+    "drug_inn": "bempedoic acid",
+    "brand_us": "Nexletol",
+    "fda_application_number": "211616",
+    "fda_approval_type": "NDA",
+    "fda_approval_date": "2020-02-21",
+    "ema_procedure_number": "EMEA/H/C/004829",
+    "ema_approval_date": "2020-04-01",
+    "cv_indication": "Dyslipidemia",
+    "notes": "CLEAR Outcomes published 2023 post-approval."
+  },
+  {
+    "drug_inn": "dapagliflozin",
+    "brand_us": "Farxiga (HFrEF indication)",
+    "fda_application_number": "202293",
+    "fda_approval_type": "sNDA",
+    "fda_approval_date": "2020-05-05",
+    "ema_procedure_number": "EMEA/H/C/002322",
+    "ema_approval_date": "2020-11-13",
+    "cv_indication": "HFrEF",
+    "notes": "sNDA to 202293 (original diabetes NDA 2014). DAPA-HF pivotal. Separate corpus entry from diabetes original approval."
+  },
+  {
+    "drug_inn": "empagliflozin",
+    "brand_us": "Jardiance (HFrEF indication)",
+    "fda_application_number": "204629",
+    "fda_approval_type": "sNDA",
+    "fda_approval_date": "2021-08-18",
+    "ema_procedure_number": "EMEA/H/C/002677",
+    "ema_approval_date": "2021-06-28",
+    "cv_indication": "HFrEF",
+    "notes": "sNDA to 204629. EMPEROR-Reduced pivotal."
+  },
+  {
+    "drug_inn": "inclisiran",
+    "brand_us": "Leqvio",
+    "fda_application_number": "214012",
+    "fda_approval_type": "NDA",
+    "fda_approval_date": "2021-12-22",
+    "ema_procedure_number": "EMEA/H/C/005333",
+    "ema_approval_date": "2020-12-09",
+    "cv_indication": "Dyslipidemia (siRNA)",
+    "notes": "ORION-9/10/11 pivotal. CV outcomes (ORION-4, VICTORION-2) pending at approval."
+  },
+  {
+    "drug_inn": "vericiguat",
+    "brand_us": "Verquvo",
+    "fda_application_number": "214377",
+    "fda_approval_type": "NDA",
+    "fda_approval_date": "2021-01-19",
+    "ema_procedure_number": "EMEA/H/C/005325",
+    "ema_approval_date": "2021-07-16",
+    "cv_indication": "HFrEF (worsening)",
+    "notes": "VICTORIA pivotal."
+  },
+  {
+    "drug_inn": "finerenone",
+    "brand_us": "Kerendia",
+    "fda_application_number": "215341",
+    "fda_approval_type": "NDA",
+    "fda_approval_date": "2021-07-09",
+    "ema_procedure_number": "EMEA/H/C/005689",
+    "ema_approval_date": "2022-02-16",
+    "cv_indication": "CKD+T2D (CV outcomes)",
+    "notes": "FIDELIO-DKD and FIGARO-DKD pivotal. Borderline cardio-renal; included per docs/corpus-criteria.md boundary-case rules because of CV event endpoint."
+  },
+  {
+    "drug_inn": "mavacamten",
+    "brand_us": "Camzyos",
+    "fda_application_number": "214998",
+    "fda_approval_type": "NDA",
+    "fda_approval_date": "2022-04-28",
+    "ema_procedure_number": "EMEA/H/C/005459",
+    "ema_approval_date": "2023-06-30",
+    "cv_indication": "Obstructive HCM",
+    "notes": "EXPLORER-HCM pivotal."
+  },
+  {
+    "drug_inn": "empagliflozin",
+    "brand_us": "Jardiance (HFpEF indication)",
+    "fda_application_number": "204629",
+    "fda_approval_type": "sNDA",
+    "fda_approval_date": "2022-02-24",
+    "ema_procedure_number": "EMEA/H/C/002677",
+    "ema_approval_date": null,
+    "cv_indication": "HFpEF",
+    "notes": "sNDA to 204629 for HFpEF indication. EMPEROR-Preserved pivotal. Distinct corpus entry from HFrEF sNDA."
+  },
+  {
+    "drug_inn": "dapagliflozin",
+    "brand_us": "Farxiga (HFpEF indication)",
+    "fda_application_number": "202293",
+    "fda_approval_type": "sNDA",
+    "fda_approval_date": "2023-05-09",
+    "ema_procedure_number": "EMEA/H/C/002322",
+    "ema_approval_date": null,
+    "cv_indication": "HF across EF spectrum",
+    "notes": "sNDA to 202293. DELIVER pivotal."
+  },
+  {
+    "drug_inn": "sotagliflozin",
+    "brand_us": "Inpefa",
+    "fda_application_number": "216203",
+    "fda_approval_type": "NDA",
+    "fda_approval_date": "2023-05-26",
+    "ema_procedure_number": null,
+    "ema_approval_date": null,
+    "cv_indication": "HF",
+    "notes": "SOLOIST-WHF and SCORED pivotal."
+  },
+  {
+    "drug_inn": "icosapent ethyl",
+    "brand_us": "Vascepa (CV risk indication)",
+    "fda_application_number": "202057",
+    "fda_approval_type": "sNDA",
+    "fda_approval_date": "2019-12-13",
+    "ema_procedure_number": "EMEA/H/C/005656",
+    "ema_approval_date": "2021-03-26",
+    "cv_indication": "CV risk reduction",
+    "notes": "sNDA to 202057 for CV risk indication. REDUCE-IT pivotal."
+  },
+  {
+    "drug_inn": "semaglutide",
+    "brand_us": "Wegovy (CV risk indication)",
+    "fda_application_number": "215256",
+    "fda_approval_type": "sNDA",
+    "fda_approval_date": "2024-03-08",
+    "ema_procedure_number": "EMEA/H/C/005422",
+    "ema_approval_date": null,
+    "cv_indication": "CV risk reduction (obesity)",
+    "notes": "sNDA to 215256 for CV risk indication. SELECT pivotal."
+  },
+  {
+    "drug_inn": "acoramidis",
+    "brand_us": "Attruby",
+    "fda_application_number": "217302",
+    "fda_approval_type": "NDA",
+    "fda_approval_date": "2024-11-22",
+    "ema_procedure_number": null,
+    "ema_approval_date": null,
+    "cv_indication": "ATTR-CM",
+    "notes": "ATTRibute-CM pivotal."
+  }
+]
