@@ -36,7 +36,8 @@ class SectionNotFoundError(RuntimeError):
     pass
 
 
-# Primary anchors: numbered top-level section heads.
+# Primary anchors: numbered top-level section heads in the legacy
+# "Medical Review" template (2015-era Entresto, Uptravi, etc.).
 _EFFICACY_HEAD_RE = re.compile(
     r"^\s*\d{1,2}\s+Review of Efficacy\s*$",
     re.IGNORECASE | re.MULTILINE,
@@ -46,9 +47,27 @@ _SAFETY_HEAD_RE = re.compile(
     re.IGNORECASE | re.MULTILINE,
 )
 
-# Fallback anchors for MedRs with a non-standard layout.
+# Fallback anchors for MedRs with a non-standard layout. Includes the
+# 2020+ "OtherR" integrated-review template where efficacy lives under
+# "Clinical Studies" / "Pivotal Study" / "Pivotal Phase III" / etc.
+# The trailing `(?![.\s]*\d)` negative lookahead rejects TOC entries,
+# which have dot-leaders and page numbers after the heading text.
 _EFFICACY_FALLBACK_RE = re.compile(
-    r"^\s*(?:Clinical Efficacy|Efficacy Review|Efficacy Summary)\s*$",
+    r"^\s*(?:Clinical Efficacy|Efficacy Review|Efficacy Summary"
+    r"|Clinical Studies|Pivotal Study|Pivotal Phase|Primary Efficacy"
+    r"|Efficacy Results|Efficacy Evaluation)"
+    r"(?![.\s]*\d)"
+    r"[^\n]*$",
+    re.IGNORECASE | re.MULTILINE,
+)
+
+# Additional end-anchor candidates for the OtherR template — "Safety"
+# isn't always the immediately-following top section.
+_SAFETY_FALLBACK_RE = re.compile(
+    r"^\s*(?:Clinical Safety|Safety Review|Safety Summary"
+    r"|Benefit[\s-]Risk|Adverse Reactions|Postmarketing)"
+    r"(?![.\s]*\d)"
+    r"[^\n]*$",
     re.IGNORECASE | re.MULTILINE,
 )
 
@@ -77,11 +96,23 @@ def find_efficacy_section_in_pages(pages: list[str]) -> tuple[int, int]:
     if start is None:
         raise SectionNotFoundError(
             "cannot locate efficacy section: no 'Review of Efficacy' or "
-            "fallback anchor ('Clinical Efficacy' / 'Efficacy Review' / "
-            "'Efficacy Summary') matched"
+            "OtherR-template fallback anchor (Clinical Efficacy | Efficacy "
+            "Review | Efficacy Summary | Clinical Studies | Pivotal Study "
+            "| Pivotal Phase | Primary Efficacy | Efficacy Results | "
+            "Efficacy Evaluation) matched"
         )
 
+    # End boundary: prefer the numbered "Review of Safety" head, then
+    # fall back to the OtherR-template safety / benefit-risk candidates.
     safety_start = _find_last_page(pages, _SAFETY_HEAD_RE)
+    if safety_start is None or safety_start <= start:
+        # Look for a fallback safety/benefit-risk head that appears
+        # AFTER the efficacy start (earlier occurrences are unrelated).
+        for pnum in range(start + 1, len(pages) + 1):
+            text = pages[pnum - 1] if pnum - 1 < len(pages) else ""
+            if _SAFETY_FALLBACK_RE.search(text):
+                safety_start = pnum
+                break
     if safety_start is None or safety_start <= start:
         end = len(pages)
     else:
