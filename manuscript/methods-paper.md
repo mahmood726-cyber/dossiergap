@@ -33,7 +33,9 @@ This paper describes DossierGap, a pipeline built around the hypothesis that *fa
 
 ### 2.1 Pipeline structure
 
-DossierGap is a four-stage pipeline: **download → section detection → per-trial extraction → cross-register deduplication → versioned CSV**. Each stage is tested in isolation with synthetic fixtures and in integration against real cached PDFs. The pipeline is idempotent — re-running it on the same corpus yields the same output deterministically — and runs in under 10 minutes on the 20-NME pilot corpus.
+DossierGap is a four-stage pipeline: **download → section detection → per-trial extraction → cross-register deduplication → versioned CSV** (Figure 1). Each stage is tested in isolation with synthetic fixtures and in integration against real cached PDFs. The pipeline is idempotent — re-running it on the same corpus yields the same output deterministically — and runs in under 10 minutes on the 20-NME pilot corpus.
+
+**Figure 1 (suggested).** *Pipeline architecture, four stages with explicit fail-closed gates between each.* Inputs: corpus JSON (one entry per NME, FDA + EMA dossier IDs and URLs). Stage 1: cached PDF download with `%PDF-` magic-byte check (rejects Cloudflare HTML masquerading as 200). Stage 2: efficacy-section detection — primary regex anchor, OtherR-template fallback regex, document-clustering by trial-name density. Stage 3: per-trial extraction — trial name (acronym + trial-context filter), N randomised (narrative + disposition-table fallback + negation guard + comma-format filter), primary outcome (multi-pattern), HR + CI (table preferred, narrative fallback). Stage 4: cross-register dedup (NCT primary key, composite fallback, conflicts-recorded-not-resolved). Output: versioned `dossier_trials.csv` with audit-trail page references per row. Every stage raises `ExtractionError` rather than emitting a partial record.
 
 ### 2.2 Schema contract
 
@@ -119,7 +121,7 @@ The contract test suite (`test_no_silent_failure.py`) is designed to catch mecha
 
 ### 4.5 Relationship to prior work
 
-Turner et al. (2008) [1] performed the canonical publication-gap analysis for antidepressants using hand extraction across years. Goldacre and colleagues' *COMPare* [2] and AllTrials [3] efforts have documented systematic reporting problems across broader trial populations. None of these efforts used automated dossier extraction. Recent work on AI-assisted systematic review extraction [4–6] has focused on effect-size extraction from published papers, not regulatory dossiers. DossierGap sits at the intersection of these traditions: automated, auditable, dossier-focused, and specifically designed for the hazard-ratio-dominated cardiology literature rather than the continuous-outcome-dominated psychiatric literature Turner covered.
+Turner et al. (2008) [1] performed the canonical publication-gap analysis for antidepressants using hand extraction across years; their primary published-vs-FDA effect-size discrepancy is the methodological precedent we hope to replicate in cardiology once extraction quality reaches threshold. Goldacre and colleagues' *COMPare* [2] and AllTrials [3] efforts documented systematic reporting problems across broader trial populations but worked downstream of dossier extraction, not at the dossier layer itself. Marshall and Wallace's overview of systematic-review automation [8] and Tsafnat et al.'s earlier survey [9] are the closest methodological precedents for the AI-assisted extraction architecture described here, but both focus on screening and effect-size extraction from published papers rather than regulatory dossiers. DossierGap sits at the intersection of these traditions: automated, auditable, dossier-focused, and specifically designed for the hazard-ratio-dominated cardiology literature rather than the continuous-outcome-dominated psychiatric literature Turner covered. Comparison ground-truth values (refs [4]–[7]) are the published primary analyses of the four trials extracted in section 3.4.
 
 ### 4.6 Limitations
 
@@ -139,14 +141,20 @@ Fail-closed architecture is feasible for AI-assisted regulatory-dossier extracti
 
 ---
 
-## References (stub)
+## References
 
-1. Turner EH, Matthews AM, Linardatos E, Tell RA, Rosenthal R. Selective publication of antidepressant trials and its influence on apparent efficacy. *NEJM*. 2008;358(3):252–260.
-2. Goldacre B, Drysdale H, Dale A, et al. COMPare: a prospective cohort study correcting and monitoring 58 misreported trials in real time. *Trials*. 2019;20(1):118.
-3. AllTrials campaign. `https://alltrials.net/`
-4. [Placeholder: Bossuyt on AI-assisted data extraction]
-5. [Placeholder: Schmidt on automated systematic review]
-6. [Placeholder: Marshall RobotReviewer]
+1. Turner EH, Matthews AM, Linardatos E, Tell RA, Rosenthal R. Selective publication of antidepressant trials and its influence on apparent efficacy. *NEJM*. 2008;358(3):252–260. doi:10.1056/NEJMsa065779
+2. Goldacre B, Drysdale H, Dale A, et al. COMPare: a prospective cohort study correcting and monitoring 58 misreported trials in real time. *Trials*. 2019;20(1):118. doi:10.1186/s13063-019-3173-2
+3. AllTrials campaign. `https://alltrials.net/`. Accessed 2026-04-16.
+4. McMurray JJV, Packer M, Desai AS, et al. Angiotensin-neprilysin inhibition versus enalapril in heart failure (PARADIGM-HF). *NEJM*. 2014;371(11):993–1004. doi:10.1056/NEJMoa1409077
+5. Armstrong PW, Pieske B, Anstrom KJ, et al. Vericiguat in patients with heart failure and reduced ejection fraction (VICTORIA). *NEJM*. 2020;382(20):1883–1893. doi:10.1056/NEJMoa1915928
+6. Sitbon O, Channick R, Chin KM, et al. Selexipag for the treatment of pulmonary arterial hypertension (GRIPHON). *NEJM*. 2015;373(26):2522–2533. doi:10.1056/NEJMoa1503184
+7. Giugliano RP, Ruff CT, Braunwald E, et al. Edoxaban versus warfarin in patients with atrial fibrillation (ENGAGE AF-TIMI 48). *NEJM*. 2013;369(22):2093–2104. doi:10.1056/NEJMoa1310907
+8. Marshall IJ, Wallace BC. Toward systematic review automation: a practical guide to using machine learning tools in research synthesis. *Systematic Reviews*. 2019;8(1):163. doi:10.1186/s13643-019-1074-9
+9. Tsafnat G, Glasziou P, Choong MK, Dunn A, Galgani F, Coiera E. Systematic review automation technologies. *Systematic Reviews*. 2014;3:74. doi:10.1186/2046-4053-3-74
+10. Bossuyt PM, Reitsma JB, Bruns DE, et al. STARD 2015: an updated list of essential items for reporting diagnostic accuracy studies. *BMJ*. 2015;351:h5527. doi:10.1136/bmj.h5527
+11. National Library of Medicine. Fact sheet: MEDLINE journal selection. Bethesda, MD: NLM. Accessed 2026-04-16. `https://www.nlm.nih.gov/lstrc/jsel.html`
+12. National Center for Biotechnology Information. PubMed Central inclusion criteria. Accessed 2026-04-16.
 
 ---
 
