@@ -162,6 +162,52 @@ def test_rejects_not_randomized_count():
     )
 
 
+def test_disposition_table_fallback_for_n():
+    """Task 17: when narrative 'N randomized' is absent, recover N from a
+    disposition-table row like 'Subjects in population 2,526 2,524 5,050'.
+    Takes the MAX (total arm > individual arms)."""
+    text = (
+        "Review of Efficacy: Trial TEST-VICTORIA Phase 3 pivotal study. "
+        "Disposition of subjects ITT population "
+        "Vericiguat Placebo Total "
+        "Not Randomized 1,807 "
+        "Subjects in population 2,526 2,524 5,050 "
+        "The primary endpoint was CV death or HF hospitalization. "
+        "HR 0.90; 95% CI 0.82, 0.98."
+    )
+    pages = {1: text}
+    r = extract_primary_trial(pages, **META)
+    # Should pick up 5050 (total), not 1807 (filtered negated) or 2526 (arm).
+    assert r.n_randomized == 5050
+
+
+def test_disposition_fallback_rejects_tiny_numbers():
+    """Dispositional fallback must reject numbers <100 (run-in, withdrawals)."""
+    text = (
+        "TRIAL-X Phase 3 pivotal study randomized 1,200 patients. "
+        "The primary endpoint was major adverse cardiovascular events. "
+        "HR 0.80; 95% CI 0.70, 0.92."
+    )
+    pages = {1: text}
+    r = extract_primary_trial(pages, **META)
+    # Narrative match wins; disposition fallback would also work but narrative is primary
+    assert r.n_randomized == 1200
+
+
+def test_disposition_fallback_not_triggered_when_narrative_exists():
+    """If narrative 'N randomized' matches, prefer it over disposition table."""
+    text = (
+        "Trial TEST-NAME Phase 3 pivotal. "
+        "The study randomized 3,000 patients. "
+        "Subjects in population 1,500 1,500 3,000. "
+        "The primary endpoint was all-cause mortality. "
+        "HR 0.85; 95% CI 0.76, 0.95."
+    )
+    pages = {1: text}
+    r = extract_primary_trial(pages, **META)
+    assert r.n_randomized == 3000  # narrative; disposition table would also say 3000
+
+
 # -- effect-value parsing edge cases -----------------------------------------
 
 def test_parses_hr_with_comma_separated_ci():

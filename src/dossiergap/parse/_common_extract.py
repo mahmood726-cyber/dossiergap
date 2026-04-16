@@ -85,9 +85,60 @@ def extract_trial_name(pages: dict[int, str]) -> tuple[str, int]:
 
 _NEGATION_PREFIX_RE = re.compile(r"\b(?:not|non|never)[\s-]+$", re.IGNORECASE)
 
+# Disposition-table anchors. When narrative "N subjects randomized" is absent,
+# the real trial N may live in a disposition table row such as
+# "Subjects in population 2,526 2,524 5,050" (arm1 arm2 total). The anchor
+# matches the leading label; the number extraction takes the MAXIMUM of all
+# numbers in the next 100 chars (total > individual arm counts).
+N_DISPOSITION_RE = re.compile(
+    r"(?:Subjects\s+in\s+(?:population|study|(?:the\s+)?analysis)"
+    r"|Analysis\s+set"
+    r"|FAS\b"
+    r"|ITT(?:\s+population)?"
+    r"|Intention[\s-]to[\s-]treat"
+    r"|Total\s+(?:enrolled|randomi[sz]ed|analy[sz]ed)"
+    r"|Full\s+analysis\s+set"
+    r"|Per\s+protocol\s+population)",
+    re.IGNORECASE,
+)
+
+# Disposition-fallback uses COMMA-FORMATTED numbers only. Chart axis labels
+# in pdfplumber-extracted PDFs are almost always bare integers ("5000",
+# "15000"); table counts for trial arms are almost always comma-formatted
+# ("5,050", "2,526"). This filter rejects an observed false-positive where
+# chart tick labels "0 2500 5000 7500 10000 12500 15000" were being picked
+# up as N=15000 in the Verquvo VICTORIA EPAR p.84.
+_COMMA_NUMBER_RE = re.compile(r"\b(\d{1,3}(?:,\d{3})+)\b")
+
+
+def _extract_n_from_disposition_table(pages: dict[int, str]) -> tuple[int, int] | None:
+    """Fallback N extractor: look for disposition-table anchors and return
+    the MAX comma-formatted number within 100 chars (total > arm counts).
+    Bare integers are rejected as probable chart axis labels."""
+    best: tuple[int, int] | None = None
+    for pnum in sorted(pages):
+        text = pages[pnum]
+        for m in N_DISPOSITION_RE.finditer(text):
+            window_start = m.start()
+            window_end = min(len(text), m.end() + 100)
+            window = text[window_start:window_end]
+            for nm in _COMMA_NUMBER_RE.finditer(window):
+                n = int(nm.group(1).replace(",", ""))
+                # Trial sizes typically 100-100000; reject out-of-range noise.
+                if not (100 <= n <= 100000):
+                    continue
+                if best is None or n > best[0]:
+                    best = (n, pnum)
+    return best
+
 
 def extract_n_randomized(pages: dict[int, str]) -> tuple[int, int]:
     """Find the first plausible N randomized (>= 100), skipping negated matches.
+
+    Primary: narrative 'N subjects randomized' (Phase 1 regex).
+    Fallback (Phase 2): disposition-table anchors like 'Subjects in population
+    2,526 2,524 5,050' — takes the MAX of numbers near the anchor so the
+    total is preferred over individual arm counts.
 
     FDA/EMA tables sometimes include a 'Not Randomized' row listing the count
     of subjects excluded from randomisation — e.g. Verquvo VICTORIA EPAR
@@ -104,11 +155,20 @@ def extract_n_randomized(pages: dict[int, str]) -> tuple[int, int]:
         n = int(n_str.replace(",", ""))
         if n >= 100:
             return n, pnum
+
+    # Phase 2 disposition-table fallback.
+    disposition = _extract_n_from_disposition_table(pages)
+    if disposition is not None:
+        return disposition
+
     raise ExtractionError(
-        "could not extract N randomized: no match for pattern "
+        "could not extract N randomized: no match for narrative pattern "
         "'(\\d+) (subjects|patients|participants) (were )?randomized' or "
-        "'randomized (\\d+) (subjects|patients|participants)' with N >= 100 "
-        "(negated matches like 'Not Randomized N' are deliberately skipped)"
+        "'randomized (\\d+) (subjects|patients|participants)' with N >= 100, "
+        "and no disposition-table anchor (Subjects in population / Analysis "
+        "set / FAS / ITT / Total randomized / Full analysis set) yielded a "
+        "valid N. Negated matches like 'Not Randomized N' are deliberately "
+        "skipped."
     )
 
 

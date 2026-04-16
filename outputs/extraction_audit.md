@@ -1,9 +1,18 @@
 # DossierGap Phase 1 — Task 14 Extraction Audit
 
-**Run dates**: 2026-04-15 (initial), 2026-04-15 (re-run after HR-regex widening)
+**Run dates**: 2026-04-15 (initial, Phase 1), 2026-04-15 (CI-widening), 2026-04-15 (negation filter), 2026-04-16 (Phase 2: OtherR clustering + disposition-table N fallback)
 **Corpus**: `data/cardiology-nme-corpus.json` (20 NMEs, 2015–2024 approvals)
 **CLI invocation**: `python -m dossiergap extract --corpus data/cardiology-nme-corpus.json --out outputs/dossier_trials.v0.1.0.csv --limit 20 --continue-on-error`
-**Output CSV**: `outputs/dossier_trials.v0.1.0.csv` (3 rows after CI-level regex widening; 2 rows on first run)
+**Output CSV**: `outputs/dossier_trials.v0.1.0.csv` (3 rows, all with ground-truth-matched HR values)
+
+## Trajectory across runs
+
+| Run | Rows | Clean extractions |
+|---|---|---|
+| Phase 1 initial (2026-04-15) | 2 | Entresto; Verquvo (wrong N=1807 silently extracted before negation filter) |
+| CI-widening | 3 | + Uptravi GRIPHON secondary (HR 0.67) |
+| Negation filter | 2 | Verquvo correctly drops until disposition-table fallback exists |
+| Phase 2 complete (2026-04-16) | 3 | + Verquvo VICTORIA correct N=5050 |
 
 ---
 
