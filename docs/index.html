@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DossierGap</title>
+<meta name="description" content="Fail-closed pipeline for extracting pivotal-trial data from FDA and EMA regulatory dossiers." />
+<style>
+:root { --ink: #1f2328; --muted: #656d76; --line: #d0d7de; --link: #0969da; --bg: #f6f8fa; --panel: #fff; }
+@media (prefers-color-scheme: dark) {
+  :root { --ink: #e6edf3; --muted: #8d96a0; --line: #30363d; --link: #58a6ff; --bg: #0d1117; --panel: #161b22; }
+}
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; color: var(--ink); background: var(--bg); margin: 0; line-height: 1.6; }
+main { max-width: 760px; margin: 0 auto; padding: 48px 24px; }
+h1 { font-size: 28px; margin: 0 0 8px; }
+p.tagline { color: var(--muted); font-size: 15px; margin: 0 0 32px; }
+section { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 20px; margin-bottom: 16px; }
+section h2 { margin: 0 0 8px; font-size: 18px; }
+section p { margin: 0 0 8px; font-size: 14px; color: var(--muted); }
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 32px; }
+code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 13px; background: var(--bg); padding: 2px 6px; border-radius: 3px; border: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<main>
+  <h1>DossierGap</h1>
+  <p class="tagline">A fail-closed pipeline for extracting pivotal-trial data from FDA Drugs@FDA Medical Reviews and EMA European Public Assessment Reports. v0.3.0.</p>
+
+  <section>
+    <h2>→ <a href="dashboard/">Dashboard</a></h2>
+    <p>Per-drug extraction output compared against each trial's published NEJM primary. Four rows (two clean, two flagged) from a 20-NME cardiology pilot corpus.</p>
+  </section>
+
+  <section>
+    <h2>Code</h2>
+    <p><a href="https://github.com/mahmood726-cyber/dossiergap">github.com/mahmood726-cyber/dossiergap</a> — MIT licence, 216 tests, tagged releases at v0.1.0 / v0.2.0 / v0.3.0.</p>
+  </section>
+
+  <section>
+    <h2>Locked design decisions</h2>
+    <p><a href="corpus-criteria.html">Corpus inclusion criteria</a> · <a href="pivotal-criterion.html">Pivotal-trial operational definition</a> (strict Turner-comparable primary + inclusive sensitivity)</p>
+    <p style="font-size: 12px;">Markdown originals: <a href="https://github.com/mahmood726-cyber/dossiergap/blob/main/docs/corpus-criteria.md"><code>corpus-criteria.md</code></a>, <a href="https://github.com/mahmood726-cyber/dossiergap/blob/main/docs/pivotal-criterion.md"><code>pivotal-criterion.md</code></a>.</p>
+  </section>
+
+  <section>
+    <h2>Manuscripts (drafts)</h2>
+    <p>
+      <a href="https://github.com/mahmood726-cyber/dossiergap/blob/main/manuscript/e156.md">E156 (156-word Synthesis)</a> ·
+      <a href="https://github.com/mahmood726-cyber/dossiergap/blob/main/manuscript/methods-paper.md">Methods paper (RSM / BMJ Open)</a> ·
+      <a href="https://github.com/mahmood726-cyber/dossiergap/blob/main/manuscript/joss-paper.md">JOSS variant</a>
+    </p>
+  </section>
+
+  <section>
+    <h2>Honest audit</h2>
+    <p><a href="https://github.com/mahmood726-cyber/dossiergap/blob/main/outputs/extraction_audit.md">extraction_audit.md</a> — per-drug ground-truth comparison, root-cause analysis of all 17 failures, trajectory across Phase 1 / 2 / 3 runs.</p>
+  </section>
+
+  <footer>
+    DossierGap · research release · no warranty, no replacement for hand audit
+  </footer>
+</main>
+</body>
+</html>
