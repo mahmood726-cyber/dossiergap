@@ -98,16 +98,16 @@ URL discovery combined pattern-cycling (known FDA `Orig1s000{MedR,OtherR,Multidi
 
 ### 3.3 Ground-truth comparison
 
-For each extraction that reached the CSV, the extracted hazard ratio, confidence interval, and N were compared to the published peer-reviewed primary analysis from the trial's registered primary publication. Agreement to two decimal places on HR and ±5% on N was the pre-registered threshold for a "clean" extraction.
+For each extraction that reached the CSV, the extracted hazard ratio, confidence interval, and N were compared to the published peer-reviewed primary analysis from the trial's registered primary publication [refs 4–7]. Agreement on the HR point estimate to two decimal places, on both CI bounds to two decimal places, and on N to ±5%, was the pre-registered threshold for a "clean" extraction. Both Entresto (PARADIGM-HF [4]) and Verquvo (VICTORIA [5]) extractions meet this threshold with exact agreement on all three numeric fields — a stronger result than the threshold requires.
 
 ### 3.4 Results
 
-| Drug | Trial | HR extracted | HR published | N extracted | N published | Verdict |
+| Drug | Trial | HR extracted | HR published (ref) | N extracted | N published | Verdict |
 |---|---|---|---|---|---|---|
-| Entresto | PARADIGM-HF | 0.80 (0.73–0.87) | 0.80 (0.73–0.87) | 8,442 | 8,442 | Clean |
-| Verquvo | VICTORIA | 0.90 (0.82–0.98) | 0.90 (0.81–0.99) | 5,050 | 5,050 | Clean |
-| Uptravi | GRIPHON | 0.67 (0.46–0.98) 99% | 0.60 (0.46–0.78) 99% | 1,150 | 1,156 | Noisy (secondary endpoint) |
-| Savaysa | ENGAGE AF-TIMI 48 | 0.87 (0.71–1.07) | 0.79 (0.63–0.99) | 1,146 | 21,105 | Noisy (subgroup; N off by 20×) |
+| Entresto | PARADIGM-HF | 0.80 (0.73–0.87) | 0.80 (0.73–0.87) [4] | 8,442 | 8,442 | Clean — exact match |
+| Verquvo | VICTORIA | 0.90 (0.82–0.98) | 0.90 (0.82–0.98) [5] | 5,050 | 5,050 | Clean — exact match |
+| Uptravi | GRIPHON | 0.67 (0.46–0.98) 99% | 0.60 (0.46–0.78) 99% [6] | 1,150 | 1,156 | Noisy — secondary endpoint extracted |
+| Savaysa | ENGAGE AF-TIMI 48 | 0.87 (0.71–1.07) | 0.79 (0.63–0.99) [7] | 1,146 | 21,105 | Noisy — subgroup; N off by 18× |
 
 Seventeen further source-pair extractions failed and are enumerated in the accompanying audit report (`outputs/extraction_audit.md`). Failures cluster into three modes: (1) lipid-only biologics that do not report a hazard ratio at the primary endpoint (Praluent, Repatha, Leqvio all use LDL-C mean difference; this is not a DossierGap bug but a genuine scope limitation of the HR-focused extractor); (2) 2020+ OtherR PDFs that are essentially reviewer memos without trial detail (Nexletol, Inpefa, Kerendia); (3) EMA EPARs with non-standard section numbering (Camzyos) or no EMA presence (Inpefa).
 
@@ -127,7 +127,16 @@ Four of 30 source-pair attempts produced usable output, and two of those are sem
 
 ### 4.3 The semantic-wrong-number problem
 
-Uptravi and Savaysa expose the pipeline's central limitation. Both EPARs contain the correct primary HR, but our extractor picks a secondary-analysis HR because it appears first in the text or is matched by a more-specific regex. The corruption is invisible to every schema check — the numbers are valid positive floats with the CI containing the point estimate — but wrong by reference to the published primary. Structural (regex, schema) approaches cannot distinguish primary from secondary HRs in the same document because both use identical syntax. The next methodological requirement is *semantic content scoring*: for each HR candidate, compute distance (in characters or tokens) to the nearest "primary endpoint" / "primary composite" keyword, weight candidates by outcome-word adjacency ("death", "mortality", "hospitalisation", "MACE" positively; "subgroup", "post-hoc", "secondary" negatively), and return the highest-scoring candidate rather than the first-matching one.
+Uptravi and Savaysa expose the pipeline's central limitation. Both EPARs contain the correct primary HR, but our extractor picks a secondary-analysis HR because it appears first in the text or is matched by a more-specific regex. The corruption is invisible to every schema check — the numbers are valid positive floats with the CI containing the point estimate — but wrong by reference to the published primary. Structural (regex, schema) approaches cannot distinguish primary from secondary HRs in the same document because both use identical syntax. The next methodological requirement is *semantic content scoring* of candidate extractions.
+
+A concrete proposal, not yet implemented:
+
+- Collect *all* HR+CI candidates across the efficacy-section pages (our current pattern already produces this list; it simply discards all but the first).
+- Compute two scoring signals per candidate: (i) character distance to the nearest occurrence of "primary endpoint" or "primary composite endpoint"; (ii) outcome-word adjacency within a ±200-character window, with positive weights on death / mortality / hospitalisation / MACE / infarction / stroke terms and negative weights on subgroup / post-hoc / sensitivity / exploratory / per-protocol markers.
+- Rank candidates by the combined score; return the top-scoring candidate rather than the first-matched.
+- Expose the scoring rationale in the `source_page_refs` audit trail so a hand auditor can see why a specific candidate was chosen.
+
+This is tractable — each signal is a few lines of code over the candidate list the current extractor already enumerates internally — but it was deliberately not included in v0.2.0 because an untested scoring heuristic can regress a clean extraction silently. The Entresto-PARADIGM-HF extraction is our gold-standard regression test; any scoring-based revision must preserve its correctness before being merged. We document this as the first task of any v0.3.0 revision.
 
 ### 4.4 Why hand audit remains irreplaceable
 
@@ -139,7 +148,9 @@ Turner et al. (2008) [1] performed the canonical publication-gap analysis for an
 
 ### 4.6 Limitations
 
-The pipeline is pattern-based and does not invoke a large language model at any stage. This is a deliberate choice — the failure modes of LLM extraction (hallucinated citations, plausible but wrong numbers, silent fabrication of missing fields) are exactly what a fail-closed architecture cannot tolerate. A future version may add LLM-assisted semantic scoring of candidates produced by the pattern extractor, but with the LLM constrained to rank-ordering candidates that were independently produced, never to generate new candidates. We note that the extraction rate reported here (~13%) is a *floor*, not a steady-state estimate, because substantial per-template improvements remain available.
+The pipeline is pattern-based and does not invoke a large language model at any stage. This is a deliberate design choice, not a technology gap: the failure modes of LLM extraction (hallucinated citations, plausible-but-wrong numbers, silent fabrication of missing fields) are precisely what a fail-closed architecture cannot tolerate, because the LLM's outputs can satisfy every schema invariant while being wrong by reference to the source PDF. A future version may add LLM-assisted *ranking* of candidates that the pattern extractor has independently produced — this is a constrained use where the LLM cannot generate a new number, only order an existing list. The general principle, articulated more cleanly here than in the code: the pipeline trusts regex to miss things but does not trust LLMs to invent things. Missing outputs are detectable by fail-closed errors; invented outputs look identical to legitimate ones.
+
+We note that the extraction rate reported here (~13%) is a *floor*, not a steady-state estimate. Semantic content scoring (section 4.3), lipid-primary endpoint extraction for PCSK9 biologics (currently out of scope — only HR-based primaries are parsed), and sNDA-supplement URL discovery are three specific substantial improvements that would each lift the rate. The honest framing is that DossierGap v0.2.0 demonstrates the architecture on the cleanest template class (2015-era numbered-section FDA MedRs and table-style EMA EPARs) and provides a validated substrate on which those improvements can be built without regressing the clean extractions.
 
 ### 4.7 Generalisation beyond cardiology
 

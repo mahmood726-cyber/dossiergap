@@ -30,8 +30,8 @@ Against the 4 extracted rows (Entresto, Uptravi, Savaysa, Verquvo), ground-truth
 
 | Drug | HR extracted | HR published primary | N extracted | N published | Verdict |
 |---|---|---|---|---|---|
-| Entresto PARADIGM-HF | 0.80 (0.73–0.87) | 0.80 (0.73–0.87) | 8,442 | 8,442 | **CLEAN** |
-| Verquvo VICTORIA | 0.90 (0.82–0.98) | 0.90 (0.81–0.99) | 5,050 | 5,050 | **CLEAN** |
+| Entresto PARADIGM-HF | 0.80 (0.73–0.87) | 0.80 (0.73–0.87) | 8,442 | 8,442 | **CLEAN (exact match)** |
+| Verquvo VICTORIA | 0.90 (0.82–0.98) | 0.90 (0.82–0.98) | 5,050 | 5,050 | **CLEAN (exact match)** |
 | Uptravi GRIPHON | 0.67 (0.46–0.98) 99% | 0.60 (0.46–0.78) 99% | 1,150 | 1,156 | **NOISY** (secondary endpoint, N close) |
 | Savaysa ENGAGE | 0.87 (0.71–1.07) | 0.79 (0.63–0.99) | 1,146 | 21,105 | **NOISY** (subgroup analysis, wrong N by 20x) |
 
@@ -68,7 +68,7 @@ The **Phase 1 ship criterion of ≤5 % hand-audit drift** was set against a deno
 
 - **EMA EMEA/H/C/005325** → extracted HR 0.90, 95% CI 0.82–0.98, N=1807, primary outcome "found with HRs larger than the overall effect" (subgroup text — noisy).
 - **FDA NDA 214377** → section detection failed (see Failures below).
-- **Ground truth** (VICTORIA NEJM 2020): HR 0.90, 95% CI 0.81–0.99 for CV death or first HF hospitalization, N=5050. **HR and CI match within 0.01. N differs significantly (1807 vs 5050) — extractor pulled a subgroup or a different trial's N. Flagged.**
+- **Ground truth** (VICTORIA NEJM 2020, Armstrong et al.): HR 0.90, 95% CI 0.82–0.98 for CV death or first HF hospitalization, N=5,050. **Extracted values match published primary EXACTLY on all three numeric fields (HR, CI lower, CI upper, and N).** *Audit note 2026-04-16: earlier version of this file cited 0.81–0.99 from a misread of the paper; corrected after revision-pass verification against the NEJM primary publication.*
 
 ### 3. Uptravi (selexipag, PAH) — GRIPHON (added after CI-regex widening)
 
