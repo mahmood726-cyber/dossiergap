@@ -21,7 +21,8 @@
     "ema_procedure_number": null,
     "ema_approval_date": null,
     "cv_indication": "HFrEF",
-    "notes": "US 2015 approval is the analytical unit; EU earlier as Procoralan (pre-2015 scope)."
+    "notes": "US 2015 approval is the analytical unit; EU earlier as Procoralan (pre-2015 scope). URLs seeded via Phase 3 URL discovery 2026-04-16.",
+    "fda_medical_review_url": "https://www.accessdata.fda.gov/drugsatfda_docs/nda/2015/206143Orig1s000MedR.pdf"
   },
   {
     "drug_inn": "alirocumab",
@@ -32,7 +33,9 @@
     "ema_procedure_number": "EMEA/H/C/003882",
     "ema_approval_date": "2015-09-23",
     "cv_indication": "Dyslipidemia (PCSK9)",
-    "notes": "ODYSSEY program; CV outcome added later via ODYSSEY OUTCOMES."
+    "notes": "ODYSSEY program; CV outcome added later via ODYSSEY OUTCOMES. URLs seeded via Phase 3 URL discovery 2026-04-16.",
+    "fda_medical_review_url": "https://www.accessdata.fda.gov/drugsatfda_docs/nda/2015/125559Orig1s000MedR.pdf",
+    "ema_epar_url": "https://www.ema.europa.eu/en/documents/assessment-report/praluent-epar-public-assessment-report_en.pdf"
   },
   {
     "drug_inn": "evolocumab",
@@ -43,7 +46,9 @@
     "ema_procedure_number": "EMEA/H/C/003766",
     "ema_approval_date": "2015-07-17",
     "cv_indication": "Dyslipidemia (PCSK9)",
-    "notes": "FOURIER CV outcomes trial published 2017."
+    "notes": "FOURIER CV outcomes trial published 2017. URLs seeded via Phase 3 URL discovery 2026-04-16.",
+    "fda_medical_review_url": "https://www.accessdata.fda.gov/drugsatfda_docs/nda/2015/125522Orig1s000MedR.pdf",
+    "ema_epar_url": "https://www.ema.europa.eu/en/documents/assessment-report/repatha-epar-public-assessment-report_en.pdf"
   },
   {
     "drug_inn": "selexipag",
@@ -67,7 +72,8 @@
     "ema_procedure_number": "EMEA/H/C/002629",
     "ema_approval_date": "2015-06-19",
     "cv_indication": "AF (stroke prevention)",
-    "notes": "ENGAGE AF-TIMI 48 pivotal."
+    "notes": "ENGAGE AF-TIMI 48 pivotal. URLs seeded via Phase 3 URL discovery 2026-04-16.",
+    "ema_epar_url": "https://www.ema.europa.eu/en/documents/assessment-report/lixiana-epar-public-assessment-report_en.pdf"
   },
   {
     "drug_inn": "tafamidis",
@@ -78,7 +84,8 @@
     "ema_procedure_number": "EMEA/H/C/002294",
     "ema_approval_date": null,
     "cv_indication": "ATTR-CM",
-    "notes": "ATTR-ACT pivotal. EU earlier for hATTR polyneuropathy (different indication, out of Phase 1 scope); CM indication is the Phase 1 unit."
+    "notes": "ATTR-ACT pivotal. EU earlier for hATTR polyneuropathy (different indication, out of Phase 1 scope); CM indication is the Phase 1 unit. URLs seeded via Phase 3 URL discovery 2026-04-16.",
+    "ema_epar_url": "https://www.ema.europa.eu/en/documents/assessment-report/vyndaqel-epar-public-assessment-report_en.pdf"
   },
   {
     "drug_inn": "bempedoic acid",
@@ -124,7 +131,8 @@
     "ema_procedure_number": "EMEA/H/C/005333",
     "ema_approval_date": "2020-12-09",
     "cv_indication": "Dyslipidemia (siRNA)",
-    "notes": "ORION-9/10/11 pivotal. CV outcomes (ORION-4, VICTORION-2) pending at approval."
+    "notes": "ORION-9/10/11 pivotal. CV outcomes (ORION-4, VICTORION-2) pending at approval. URLs seeded via Phase 3 URL discovery 2026-04-16.",
+    "ema_epar_url": "https://www.ema.europa.eu/en/documents/assessment-report/leqvio-epar-public-assessment-report_en.pdf"
   },
   {
     "drug_inn": "vericiguat",
@@ -148,7 +156,8 @@
     "ema_procedure_number": "EMEA/H/C/005689",
     "ema_approval_date": "2022-02-16",
     "cv_indication": "CKD+T2D (CV outcomes)",
-    "notes": "FIDELIO-DKD and FIGARO-DKD pivotal. Borderline cardio-renal; included per docs/corpus-criteria.md boundary-case rules because of CV event endpoint."
+    "notes": "FIDELIO-DKD and FIGARO-DKD pivotal. Borderline cardio-renal; included per docs/corpus-criteria.md boundary-case rules because of CV event endpoint. URLs seeded via Phase 3 URL discovery 2026-04-16.",
+    "fda_medical_review_url": "https://www.accessdata.fda.gov/drugsatfda_docs/nda/2021/215341Orig1s000OtherR.pdf"
   },
   {
     "drug_inn": "mavacamten",
@@ -172,7 +181,8 @@
     "ema_procedure_number": "EMEA/H/C/002677",
     "ema_approval_date": null,
     "cv_indication": "HFpEF",
-    "notes": "sNDA to 204629 for HFpEF indication. EMPEROR-Preserved pivotal. Distinct corpus entry from HFrEF sNDA."
+    "notes": "sNDA to 204629 for HFpEF indication. EMPEROR-Preserved pivotal. Distinct corpus entry from HFrEF sNDA. URLs seeded via Phase 3 URL discovery 2026-04-16.",
+    "ema_epar_url": "https://www.ema.europa.eu/en/documents/assessment-report/jardiance-epar-public-assessment-report_en.pdf"
   },
   {
     "drug_inn": "dapagliflozin",
@@ -194,7 +204,8 @@
     "ema_procedure_number": null,
     "ema_approval_date": null,
     "cv_indication": "HF",
-    "notes": "SOLOIST-WHF and SCORED pivotal."
+    "notes": "SOLOIST-WHF and SCORED pivotal. URLs seeded via Phase 3 URL discovery 2026-04-16.",
+    "fda_medical_review_url": "https://www.accessdata.fda.gov/drugsatfda_docs/nda/2023/216203Orig1s000OtherR.pdf"
   },
   {
     "drug_inn": "icosapent ethyl",
@@ -216,7 +227,8 @@
     "ema_procedure_number": "EMEA/H/C/005422",
     "ema_approval_date": null,
     "cv_indication": "CV risk reduction (obesity)",
-    "notes": "sNDA to 215256 for CV risk indication. SELECT pivotal."
+    "notes": "sNDA to 215256 for CV risk indication. SELECT pivotal. URLs seeded via Phase 3 URL discovery 2026-04-16.",
+    "ema_epar_url": "https://www.ema.europa.eu/en/documents/assessment-report/wegovy-epar-public-assessment-report_en.pdf"
   },
   {
     "drug_inn": "acoramidis",

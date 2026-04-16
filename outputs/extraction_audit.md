@@ -14,6 +14,30 @@
 | Negation filter | 2 | Verquvo correctly drops until disposition-table fallback exists |
 | Phase 2 tasks 15+17 (2026-04-16) | 3 | + Verquvo VICTORIA correct N=5050 |
 | Phase 2 task 16 (2026-04-16) | 3 | Expanded outcome-pattern vocabulary (colon/table/outcome forms); no new rows. Uptravi/Verquvo outcome-text still noisy — their canonical 'was' form exists but points to subgroup/procedural text, and semantic-content scoring (attempted then reverted) regressed Uptravi. Acknowledged limitation. |
+| Phase 3 task 18 URL discovery + expanded corpus (2026-04-16) | 4 | + Savaysa EMA extracted (but NOISY — HR 0.87 / N=1,146 is a subgroup analysis; published ENGAGE AF-TIMI 48 primary is HR 0.79 / N=21,105). Phase 3 revealed that URL coverage ≠ extraction quality. 17 failures exposed: lipid-only BLAs (Praluent, Repatha, Leqvio) lack HR patterns (primary is LDL-C mean difference); OtherR structural issues remain for Nexletol/Kerendia/Inpefa; several EMAs use non-standard section numbering. |
+
+## Phase 3 URL-discovery outcome (Task 18)
+
+Pattern-cycling URL discovery (`src/dossiergap/download/url_discovery.py`) auto-discovered 12 new URL fields across 10 NMEs (5 FDA, 7 EMA). Corpus now has 15/20 NMEs with at least one dossier URL.
+
+**Still missing URLs** (need hand-seeding or HTML-scraping fallback, Phase 3.5):
+- FDA: Savaysa (206316), Vyndaqel (211996), Leqvio (214012), Attruby (217302), and all sNDAs (Farxiga × 2, Jardiance × 2, Vascepa CV, Wegovy CV)
+- EMA: Farxiga, Jardiance HFrEF, Kerendia, Vascepa, Attruby, Camzyos (404 on slug), Inpefa (no EMA marketing yet)
+
+## Phase 3 extraction-quality discovery
+
+Against the 4 extracted rows (Entresto, Uptravi, Savaysa, Verquvo), ground-truth comparison reveals **2 clean + 2 noisy**:
+
+| Drug | HR extracted | HR published primary | N extracted | N published | Verdict |
+|---|---|---|---|---|---|
+| Entresto PARADIGM-HF | 0.80 (0.73–0.87) | 0.80 (0.73–0.87) | 8,442 | 8,442 | **CLEAN** |
+| Verquvo VICTORIA | 0.90 (0.82–0.98) | 0.90 (0.81–0.99) | 5,050 | 5,050 | **CLEAN** |
+| Uptravi GRIPHON | 0.67 (0.46–0.98) 99% | 0.60 (0.46–0.78) 99% | 1,150 | 1,156 | **NOISY** (secondary endpoint, N close) |
+| Savaysa ENGAGE | 0.87 (0.71–1.07) | 0.79 (0.63–0.99) | 1,146 | 21,105 | **NOISY** (subgroup analysis, wrong N by 20x) |
+
+**Root cause of the two noisy rows**: both Uptravi and Savaysa EPARs present the primary result in a format our current extractor doesn't prefer over subgroup narratives. The primary is present but not first-matched.
+
+**Phase 3 P0 blocker for publication-ready data**: semantic content scoring of HR/N matches to prefer primary-endpoint-adjacent numbers over subgroup numbers. The structural approach (pattern matching) cannot distinguish primary from subgroup because both use identical syntax; only proximity to "primary" keyword + outcome-word context can.
 
 ---
 
