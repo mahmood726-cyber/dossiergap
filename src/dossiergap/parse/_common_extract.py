@@ -37,6 +37,34 @@ PRIMARY_OUTCOME_RE = re.compile(
     re.IGNORECASE,
 )
 
+# Expanded patterns for Task 16. The canonical "primary endpoint was X"
+# form is the strongest but misses EPAR table-style definitions where the
+# endpoint is labelled without a linking verb ("Primary endpoint Time to
+# CV death..."). Pattern list is tried in order of semantic strength;
+# earliest match within the first matching pattern wins.
+PRIMARY_OUTCOME_PATTERNS = [
+    # 1. Canonical "primary (composite) endpoint was X"
+    PRIMARY_OUTCOME_RE,
+    # 2. Colon form "Primary endpoint: X"
+    re.compile(
+        r"Primary\s+(?:composite\s+)?endpoint:\s*([^.\n]{10,200}?)(?:\.|\n)",
+        re.IGNORECASE,
+    ),
+    # 3. Table-style definition "Primary (composite) endpoint Time to X".
+    # Uses [^.] (not [^.\n]) so EMA table rows that wrap across PDF lines
+    # still match. pdfplumber inserts \n between table cells, which would
+    # otherwise truncate the capture.
+    re.compile(
+        r"Primary\s+(?:composite\s+)?endpoint\s+(Time\s+to\s+[^.]{10,200})",
+        re.IGNORECASE,
+    ),
+    # 4. "Primary outcome (measure)?: X"
+    re.compile(
+        r"Primary\s+outcome(?:\s+measure)?:\s*([^.\n]{10,200}?)(?:\.|\n)",
+        re.IGNORECASE,
+    ),
+]
+
 ACRONYM_RE = re.compile(r"\b([A-Z]{4,20}(?:-[A-Za-z0-9]{1,10})?)\b")
 
 ACRONYM_STOPWORDS = {
@@ -173,15 +201,42 @@ def extract_n_randomized(pages: dict[int, str]) -> tuple[int, int]:
 
 
 def extract_primary_outcome(pages: dict[int, str]) -> tuple[str, int]:
-    hits = find_all(PRIMARY_OUTCOME_RE, pages)
-    if not hits:
-        raise ExtractionError(
-            "could not extract primary outcome/endpoint: no match for "
-            "'(The )?primary (composite )?endpoint was <text>' pattern"
-        )
-    pnum, m = min(hits, key=lambda h: len(h[1].group(1)))
-    text = " ".join(m.group(1).split())
-    return text, pnum
+    """Extract the primary outcome/endpoint text.
+
+    Strategy (Task 16, refined after a failed earliest-match experiment):
+      1. Try canonical 'primary (composite) endpoint was X' — shortest match
+         wins (the canonical definition is usually the tersest phrasing;
+         longer matches tend to be narrative continuations).
+      2. If the canonical pattern yields ZERO matches, try the alternative
+         patterns (colon form, table-style 'Time to', 'Primary outcome:')
+         in order and return the earliest match from the first hit.
+
+    The 'earliest across all patterns' strategy was tried and regressed
+    Uptravi to method-description text ('...performed on the Full Analysis
+    Set...'). Shortest-within-canonical preserves Phase 1 behaviour for
+    Entresto and doesn't degrade the others.
+    """
+    canonical_hits = find_all(PRIMARY_OUTCOME_RE, pages)
+    if canonical_hits:
+        pnum, m = min(canonical_hits, key=lambda h: len(h[1].group(1)))
+        text = " ".join(m.group(1).split())
+        return text, pnum
+
+    # Fallback to alternative patterns for PDFs where the canonical
+    # 'was' form is absent (EMA table-only layouts, for instance).
+    for pattern in PRIMARY_OUTCOME_PATTERNS[1:]:
+        hits = find_all(pattern, pages)
+        if hits:
+            pnum, m = hits[0]
+            text = " ".join(m.group(1).split())
+            return text, pnum
+
+    raise ExtractionError(
+        "could not extract primary outcome/endpoint: none of the patterns "
+        "matched — canonical 'primary endpoint was X', colon form 'Primary "
+        "endpoint: X', table-style 'Primary endpoint Time to X', or "
+        "'Primary outcome: X'"
+    )
 
 
 def extract_phase(pages: dict[int, str]) -> str:

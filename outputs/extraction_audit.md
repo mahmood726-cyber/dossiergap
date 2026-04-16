@@ -12,7 +12,8 @@
 | Phase 1 initial (2026-04-15) | 2 | Entresto; Verquvo (wrong N=1807 silently extracted before negation filter) |
 | CI-widening | 3 | + Uptravi GRIPHON secondary (HR 0.67) |
 | Negation filter | 2 | Verquvo correctly drops until disposition-table fallback exists |
-| Phase 2 complete (2026-04-16) | 3 | + Verquvo VICTORIA correct N=5050 |
+| Phase 2 tasks 15+17 (2026-04-16) | 3 | + Verquvo VICTORIA correct N=5050 |
+| Phase 2 task 16 (2026-04-16) | 3 | Expanded outcome-pattern vocabulary (colon/table/outcome forms); no new rows. Uptravi/Verquvo outcome-text still noisy — their canonical 'was' form exists but points to subgroup/procedural text, and semantic-content scoring (attempted then reverted) regressed Uptravi. Acknowledged limitation. |
 
 ---
 
