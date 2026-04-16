@@ -1,0 +1,63 @@
+%% DossierGap pipeline architecture — Figure 1 for the methods paper.
+%% Renders natively on GitHub markdown. Source: manuscript/figure1.mmd.
+%% Each stage shows its primary action + the explicit fail-closed gate.
+
+flowchart TD
+    Corpus["Corpus JSON<br/>(NME → FDA app no.,<br/>EMA procedure no., URLs)"]:::input
+
+    subgraph S1 [" Stage 1 — Download "]
+        FDA["fetch_medical_review<br/>(FDA Drugs@FDA)"]:::stage
+        EMA["fetch_epar<br/>(EMA EPAR)"]:::stage
+        Magic{{"%PDF- magic-byte<br/>check"}}:::gate
+    end
+
+    subgraph S2 [" Stage 2 — Section detection "]
+        Primary["Primary regex<br/>'N Review of Efficacy'"]:::stage
+        Fallback["OtherR fallback regex<br/>(Clinical Studies / Pivotal Phase / etc.)"]:::stage
+        Cluster["Trial-name cluster<br/>(acronym density + trial-context filter)"]:::stage
+        SecGate{{"SectionNotFoundError<br/>if all three fail"}}:::gate
+    end
+
+    subgraph S3 [" Stage 3 — Per-trial extraction "]
+        Trial["trial_name<br/>(stopword-filtered acronym)"]:::stage
+        N["n_randomized<br/>(narrative → disposition table)"]:::stage
+        NGuard{{"Negation filter +<br/>comma-format filter"}}:::gate
+        Outcome["primary_outcome<br/>(canonical 'was' + alt patterns)"]:::stage
+        HR["HR + 95% CI<br/>(table preferred, narrative fallback)"]:::stage
+        ExGate{{"ExtractionError<br/>if any required field missing"}}:::gate
+    end
+
+    Schema{{"TrialRecord schema<br/>(pydantic invariants:<br/>ci_low ≤ est ≤ ci_high,<br/>strict ⊆ inclusive,<br/>page_refs non-empty)"}}:::gate
+
+    subgraph S4 [" Stage 4 — Dedup + output "]
+        Dedup["dedup_trials<br/>(NCT primary key,<br/>composite fallback)"]:::stage
+        Conflicts["dedup_conflicts<br/>recorded in CSV column"]:::stage
+        CSVw["write_csv<br/>(versioned, frozen schema)"]:::stage
+    end
+
+    Output["dossier_trials.<br/>v0.x.x.csv"]:::output
+    Audit["extraction_audit.md<br/>(hand-audit vs published)"]:::output
+
+    Corpus --> FDA & EMA
+    FDA & EMA --> Magic
+    Magic --> Primary
+    Primary --> Fallback
+    Fallback --> Cluster
+    Cluster --> SecGate
+    SecGate --> Trial
+    Trial --> N
+    N --> NGuard
+    NGuard --> Outcome
+    Outcome --> HR
+    HR --> ExGate
+    ExGate --> Schema
+    Schema --> Dedup
+    Dedup --> Conflicts
+    Conflicts --> CSVw
+    CSVw --> Output
+    Output -. required hand-audit .-> Audit
+
+    classDef input fill:#e6f3ff,stroke:#1f6feb,stroke-width:2px
+    classDef stage fill:#f6f8fa,stroke:#57606a,stroke-width:1px
+    classDef gate fill:#ffe6e6,stroke:#cf222e,stroke-width:2px,stroke-dasharray: 5 5
+    classDef output fill:#e6ffec,stroke:#1a7f37,stroke-width:2px

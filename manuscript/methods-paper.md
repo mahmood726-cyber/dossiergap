@@ -35,7 +35,21 @@ This paper describes DossierGap, a pipeline built around the hypothesis that *fa
 
 DossierGap is a four-stage pipeline: **download → section detection → per-trial extraction → cross-register deduplication → versioned CSV** (Figure 1). Each stage is tested in isolation with synthetic fixtures and in integration against real cached PDFs. The pipeline is idempotent — re-running it on the same corpus yields the same output deterministically — and runs in under 10 minutes on the 20-NME pilot corpus.
 
-**Figure 1 (suggested).** *Pipeline architecture, four stages with explicit fail-closed gates between each.* Inputs: corpus JSON (one entry per NME, FDA + EMA dossier IDs and URLs). Stage 1: cached PDF download with `%PDF-` magic-byte check (rejects Cloudflare HTML masquerading as 200). Stage 2: efficacy-section detection — primary regex anchor, OtherR-template fallback regex, document-clustering by trial-name density. Stage 3: per-trial extraction — trial name (acronym + trial-context filter), N randomised (narrative + disposition-table fallback + negation guard + comma-format filter), primary outcome (multi-pattern), HR + CI (table preferred, narrative fallback). Stage 4: cross-register dedup (NCT primary key, composite fallback, conflicts-recorded-not-resolved). Output: versioned `dossier_trials.csv` with audit-trail page references per row. Every stage raises `ExtractionError` rather than emitting a partial record.
+**Figure 1 (rendered from `manuscript/figure1.mmd`).** *Pipeline architecture, four stages with explicit fail-closed gates between each.* Inputs: corpus JSON (one entry per NME, FDA + EMA dossier IDs and URLs). Stage 1: cached PDF download with `%PDF-` magic-byte check (rejects Cloudflare HTML masquerading as 200). Stage 2: efficacy-section detection — primary regex anchor, OtherR-template fallback regex, document-clustering by trial-name density. Stage 3: per-trial extraction — trial name (acronym + trial-context filter), N randomised (narrative + disposition-table fallback + negation guard + comma-format filter), primary outcome (multi-pattern), HR + CI (table preferred, narrative fallback). Stage 4: cross-register dedup (NCT primary key, composite fallback, conflicts-recorded-not-resolved). Output: versioned `dossier_trials.csv` with audit-trail page references per row, plus a required hand-audit report (`extraction_audit.md`) comparing extracted values to published primaries. Every stage raises `ExtractionError` rather than emitting a partial record. Mermaid source is rendered natively on GitHub at `https://github.com/mahmood726-cyber/dossiergap/blob/main/manuscript/figure1.mmd` and can be exported to SVG via the Mermaid CLI for publication.
+
+```mermaid
+flowchart TD
+    Corpus["Corpus JSON"] --> FDA["fetch_medical_review"]
+    Corpus --> EMA["fetch_epar"]
+    FDA --> Magic{{"%PDF- magic check"}}
+    EMA --> Magic
+    Magic --> Section["Section detection<br/>(primary → fallback → cluster)"]
+    Section --> Extract["Per-trial extraction<br/>(name, N, outcome, HR+CI)"]
+    Extract --> Schema{{"TrialRecord<br/>schema invariants"}}
+    Schema --> Dedup["Cross-register dedup<br/>(NCT key + composite)"]
+    Dedup --> CSV["dossier_trials.csv<br/>(versioned, frozen schema)"]
+    CSV -. required .-> Audit["extraction_audit.md<br/>(hand-audit vs published)"]
+```
 
 ### 2.2 Schema contract
 

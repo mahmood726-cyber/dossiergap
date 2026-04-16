@@ -17,8 +17,11 @@ Cardiology NME dossier pivotal-trial publication-gap audit. FDA Drugs@FDA + EMA 
 
 ## Manuscripts
 
-- `manuscript/e156.md` — 156-word *Synthesis* submission draft (7 sentences).
-- `manuscript/methods-paper.md` — full methods-paper draft targeting *Research Synthesis Methods* / *BMJ Open* / *JOSS*.
+- `manuscript/e156.md` — 156-word *Synthesis* submission draft (7 sentences, exact spec).
+- `manuscript/methods-paper.md` — full methods-paper draft (~3200 words, 12 DOI-anchored refs) targeting *Research Synthesis Methods* / *BMJ Open*.
+- `manuscript/joss-paper.md` — compressed *Journal of Open Source Software* variant (~676-word body, JOSS-format YAML front matter).
+- `manuscript/paper.bib` — BibTeX references for the JOSS submission.
+- `manuscript/figure1.mmd` — Mermaid source for the four-stage pipeline architecture diagram (renders natively on GitHub; export to SVG with `mmdc -i figure1.mmd -o figure1.svg` for publication).
 - `outputs/extraction_audit.md` — honest audit of extraction results per drug, with ground-truth comparisons.
 
 ## Preflight
