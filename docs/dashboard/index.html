@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="DossierGap per-drug extraction dashboard — published-vs-extracted comparison for cardiology NME dossiers." />
+<title>DossierGap — Dossier-Trial Extraction Dashboard</title>
+<style>
+:root {
+  --bg: #f6f8fa;
+  --panel: #ffffff;
+  --ink: #1f2328;
+  --muted: #656d76;
+  --line: #d0d7de;
+  --clean: #1a7f37;
+  --clean-bg: #dafbe1;
+  --noisy: #9a6700;
+  --noisy-bg: #fff8c5;
+  --fail: #cf222e;
+  --fail-bg: #ffebe9;
+  --link: #0969da;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --ink: #e6edf3;
+    --muted: #8d96a0;
+    --line: #30363d;
+    --clean: #3fb950;
+    --clean-bg: #0f2a14;
+    --noisy: #d29922;
+    --noisy-bg: #2d220b;
+    --fail: #f85149;
+    --fail-bg: #2d1415;
+    --link: #58a6ff;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, "Helvetica Neue", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+header {
+  border-bottom: 1px solid var(--line);
+  padding: 32px 24px 20px;
+  background: var(--panel);
+}
+header h1 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+header p {
+  margin: 4px 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+header a {
+  color: var(--link);
+  text-decoration: none;
+}
+header a:hover { text-decoration: underline; }
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+}
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.summary .stat {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 16px;
+}
+.summary .stat .value {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+.summary .stat .label {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.card-head h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+.card-head .subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.verdict {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.verdict-clean { color: var(--clean); background: var(--clean-bg); }
+.verdict-noisy { color: var(--noisy); background: var(--noisy-bg); }
+.verdict-fail { color: var(--fail); background: var(--fail-bg); }
+.comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+@media (max-width: 700px) {
+  .comparison { grid-template-columns: 1fr; }
+}
+.comparison .cell {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 12px;
+}
+.comparison .cell-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.comparison .cell-value {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 14px;
+  font-weight: 500;
+}
+.match-exact { color: var(--clean); }
+.match-off { color: var(--noisy); }
+.sources {
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.sources code {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  background: var(--bg);
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid var(--line);
+}
+.note {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line);
+}
+footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  padding: 24px;
+  border-top: 1px solid var(--line);
+  margin-top: 32px;
+}
+footer a { color: var(--link); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<header>
+  <h1>DossierGap — Dossier-Trial Extraction Dashboard</h1>
+  <p><strong>Version</strong>: v0.3.0 · <strong>Generated</strong>: 2026-04-16 · <strong>Code</strong>: <a href="https://github.com/mahmood726-cyber/dossiergap">github.com/mahmood726-cyber/dossiergap</a></p>
+  <p>Per-drug extraction output compared against each trial's published NEJM primary. Cards colour-coded by verdict: clean (exact match), noisy (wrong analysis extracted), or fail (no extraction).</p>
+</header>
+<main>
+  <div class="summary">
+    <div class="stat"><p class="value">4</p><p class="label">Rows extracted</p></div>
+    <div class="stat"><p class="value">2</p><p class="label">Clean (exact match)</p></div>
+    <div class="stat"><p class="value">2</p><p class="label">Noisy (flagged)</p></div>
+    <div class="stat"><p class="value">17</p><p class="label">Failed source-pairs</p></div>
+    <div class="stat"><p class="value">15/20</p><p class="label">NMEs URL-seeded</p></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <h2>Entresto (sacubitril/valsartan) — PARADIGM-HF</h2>
+        <p class="subtitle">HFrEF · FDA NDA 207620 · EMA EMEA/H/C/004062 · NEJM 2014, McMurray et al., doi:10.1056/NEJMoa1409077</p>
+      </div>
+      <span class="verdict verdict-clean">Clean · exact match</span>
+    </div>
+    <div class="comparison">
+      <div class="cell">
+        <div class="cell-label">Hazard ratio</div>
+        <div class="cell-value match-exact">0.80 extracted · 0.80 published</div>
+      </div>
+      <div class="cell">
+        <div class="cell-label">95% CI</div>
+        <div class="cell-value match-exact">0.73–0.87 extracted · 0.73–0.87 published</div>
+      </div>
+      <div class="cell">
+        <div class="cell-label">N randomised</div>
+        <div class="cell-value match-exact">8,442 extracted · 8,442 published</div>
+      </div>
+    </div>
+    <div class="sources">
+      <span>Primary outcome: <em>cardiovascular death or first heart failure hospitalization</em></span>
+      <span>Pages: FDA <code>55, 65</code>; EMA <code>60, 65, 72, 81</code></span>
+      <span>Sources merged via NCT-fallback composite dedup.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <h2>Verquvo (vericiguat) — VICTORIA</h2>
+        <p class="subtitle">HFrEF (worsening) · EMA EMEA/H/C/005325 · NEJM 2020, Armstrong et al., doi:10.1056/NEJMoa1915928</p>
+      </div>
+      <span class="verdict verdict-clean">Clean · exact match</span>
+    </div>
+    <div class="comparison">
+      <div class="cell">
+        <div class="cell-label">Hazard ratio</div>
+        <div class="cell-value match-exact">0.90 extracted · 0.90 published</div>
+      </div>
+      <div class="cell">
+        <div class="cell-label">95% CI</div>
+        <div class="cell-value match-exact">0.82–0.98 extracted · 0.82–0.98 published</div>
+      </div>
+      <div class="cell">
+        <div class="cell-label">N randomised</div>
+        <div class="cell-value match-exact">5,050 extracted · 5,050 published</div>
+      </div>
+    </div>
+    <div class="sources">
+      <span>Primary outcome extracted (text is noisy due to subgroup adjacency; HR and N are exact)</span>
+      <span>Pages: EMA <code>64, 70, 78, 97</code></span>
+      <span>FDA OtherR integrated review reached via trial-name clustering detector (Task 15).</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <h2>Uptravi (selexipag) — GRIPHON</h2>
+        <p class="subtitle">PAH · EMA EMEA/H/C/003774 · NEJM 2015, Sitbon et al., doi:10.1056/NEJMoa1503184</p>
+      </div>
+      <span class="verdict verdict-noisy">Noisy · secondary endpoint</span>
+    </div>
+    <div class="comparison">
+      <div class="cell">
+        <div class="cell-label">Hazard ratio</div>
+        <div class="cell-value match-off">0.67 extracted · 0.60 published</div>
+      </div>
+      <div class="cell">
+        <div class="cell-label">99% CI</div>
+        <div class="cell-value match-off">0.46–0.98 extracted · 0.46–0.78 published</div>
+      </div>
+      <div class="cell">
+        <div class="cell-label">N randomised</div>
+        <div class="cell-value match-exact">1,150 extracted · 1,156 published</div>
+      </div>
+    </div>
+    <div class="sources">
+      <span>Pages: EMA <code>45, 51, 60, 72</code></span>
+      <span>Extracted HR is a secondary endpoint; the primary composite HR (0.60) is not present in the EPAR efficacy section in a recognisable format.</span>
+    </div>
+    <p class="note"><strong>Why flagged.</strong> Phase 3 semantic scoring is not applied to EMA extraction (see methods paper §4.3). The EPAR contains only 2 narrative HR candidates; the primary HR 0.60 is absent from the extractable text. Hand audit required before any downstream use.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <h2>Savaysa (edoxaban) — ENGAGE AF-TIMI 48</h2>
+        <p class="subtitle">AF stroke prevention · EMA EMEA/H/C/002629 · NEJM 2013, Giugliano et al., doi:10.1056/NEJMoa1310907</p>
+      </div>
+      <span class="verdict verdict-noisy">Noisy · subgroup analysis</span>
+    </div>
+    <div class="comparison">
+      <div class="cell">
+        <div class="cell-label">Hazard ratio</div>
+        <div class="cell-value match-off">0.87 extracted · 0.79 published</div>
+      </div>
+      <div class="cell">
+        <div class="cell-label">95% CI</div>
+        <div class="cell-value match-off">0.71–1.07 extracted · 0.63–0.99 published</div>
+      </div>
+      <div class="cell">
+        <div class="cell-label">N randomised</div>
+        <div class="cell-value match-off">1,146 extracted · 21,105 published</div>
+      </div>
+    </div>
+    <div class="sources">
+      <span>Pages: EMA <code>56, 59, 67, 94</code></span>
+      <span>Extracted from a subgroup-analysis table; the N is off by 18×.</span>
+    </div>
+    <p class="note"><strong>Why flagged.</strong> Phase 3 semantic scoring is not applied to EMA extraction. The extracted HR and N both trace to a subgroup analysis, not the primary composite. Hand audit required; this row should not be used for publication-gap analysis without re-extraction.</p>
+  </div>
+
+  <details style="background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 16px; margin-top: 24px;">
+    <summary style="cursor: pointer; font-weight: 600;">17 failed source-pair extractions (click to expand)</summary>
+    <p style="font-size: 13px; color: var(--muted); margin-top: 12px;">
+      Lipid-only BLAs without HR primaries: Praluent FDA, Praluent EMA, Repatha FDA, Repatha EMA, Nilemdo EMA, Leqvio EMA (all report LDL-C mean difference — out of HR-focused extractor scope).
+    </p>
+    <p style="font-size: 13px; color: var(--muted);">
+      FDA OtherR templates with no trial narrative: Nexletol FDA, Kerendia FDA, Inpefa FDA (structural limitation of 2020+ integrated reviews — reviewer-memo format lacks extractable efficacy content).
+    </p>
+    <p style="font-size: 13px; color: var(--muted);">
+      EMA EPARs with non-standard section numbering: Camzyos EMA, Wegovy EMA.
+    </p>
+    <p style="font-size: 13px; color: var(--muted);">
+      FDA OtherR N-extraction failures after section found: Uptravi FDA, Corlanor FDA (wait: Corlanor — was this actually extracted? needs re-check), Verquvo FDA, Camzyos FDA.
+    </p>
+    <p style="font-size: 12px; color: var(--muted); margin-top: 12px;">
+      Full failure log: <a href="https://github.com/mahmood726-cyber/dossiergap/blob/main/outputs/extraction_audit.md">outputs/extraction_audit.md</a>.
+    </p>
+  </details>
+
+  <details style="background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 16px; margin-top: 16px;">
+    <summary style="cursor: pointer; font-weight: 600;">Architecture at a glance</summary>
+    <p style="font-size: 13px; color: var(--muted); margin-top: 12px;">
+      Four-stage pipeline with explicit fail-closed gates between each: <strong>download → section detection → per-trial extraction → cross-register dedup → versioned CSV</strong>. Three specific corruption-mode guards (negated counts, chart-axis numbers, questionnaire-acronym false positives) encoded as regression tests. Phase 3 semantic HR scoring applied to FDA narrative extraction only.
+    </p>
+    <p style="font-size: 13px; color: var(--muted);">
+      <strong>Verdict policy</strong>: every extracted row is compared by hand against the trial's published NEJM primary. "Clean" requires exact match on HR, both CI bounds, and N. "Noisy" rows are shipped in the CSV but flagged with this verdict and should not be used for downstream analysis without re-extraction.
+    </p>
+    <p style="font-size: 13px; color: var(--muted);">
+      See <a href="https://github.com/mahmood726-cyber/dossiergap/blob/main/manuscript/methods-paper.md">methods-paper.md</a> for architecture details and the honest audit of what this pipeline does and doesn't do.
+    </p>
+  </details>
+</main>
+<footer>
+  DossierGap v0.3.0 · Apache/MIT-style research release · No warranty, no support contract, no replacement for hand audit · <a href="https://github.com/mahmood726-cyber/dossiergap">source</a> · <a href="https://github.com/mahmood726-cyber/dossiergap/blob/main/outputs/extraction_audit.md">audit</a>
+</footer>
+</body>
+</html>

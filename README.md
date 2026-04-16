@@ -24,6 +24,12 @@ Cardiology NME dossier pivotal-trial publication-gap audit. FDA Drugs@FDA + EMA 
 - `manuscript/figure1.mmd` — Mermaid source for the four-stage pipeline architecture diagram (renders natively on GitHub; export to SVG with `mmdc -i figure1.mmd -o figure1.svg` for publication).
 - `outputs/extraction_audit.md` — honest audit of extraction results per drug, with ground-truth comparisons.
 
+## Dashboard
+
+Per-drug extraction-vs-published comparison, single-file HTML:
+
+- `docs/dashboard/index.html` — serve locally or via GitHub Pages. Shows the four extracted trials with exact-match vs noisy verdicts, expandable failure list, expandable architecture overview. No JS dependencies, no build step, works offline.
+
 ## Preflight
 
 ```
