@@ -193,7 +193,8 @@
     "ema_procedure_number": "EMEA/H/C/002322",
     "ema_approval_date": null,
     "cv_indication": "HF across EF spectrum",
-    "notes": "sNDA to 202293. DELIVER pivotal."
+    "fda_medical_review_url": "https://www.accessdata.fda.gov/drugsatfda_docs/nda/2023/202293Orig1s026.pdf",
+    "notes": "sNDA to 202293. DELIVER pivotal. FDA URL discovered via Drugs@FDA overview-page scrape (Phase 4 Task 21). Supplement s026 approved 2023."
   },
   {
     "drug_inn": "sotagliflozin",
@@ -227,8 +228,9 @@
     "ema_procedure_number": "EMEA/H/C/005422",
     "ema_approval_date": null,
     "cv_indication": "CV risk reduction (obesity)",
-    "notes": "sNDA to 215256 for CV risk indication. SELECT pivotal. URLs seeded via Phase 3 URL discovery 2026-04-16.",
-    "ema_epar_url": "https://www.ema.europa.eu/en/documents/assessment-report/wegovy-epar-public-assessment-report_en.pdf"
+    "notes": "sNDA to 215256 for CV risk indication. SELECT pivotal. FDA URL discovered via Drugs@FDA overview-page scrape (s011, 2024). URLs seeded via Phase 3/4 discovery.",
+    "ema_epar_url": "https://www.ema.europa.eu/en/documents/assessment-report/wegovy-epar-public-assessment-report_en.pdf",
+    "fda_medical_review_url": "https://www.accessdata.fda.gov/drugsatfda_docs/nda/2024/215256Orig1s011.pdf"
   },
   {
     "drug_inn": "acoramidis",

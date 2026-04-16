@@ -15,6 +15,7 @@ Known limits of the pattern approach:
 """
 from __future__ import annotations
 
+import re
 import time
 from dataclasses import dataclass
 from urllib.parse import quote
@@ -115,6 +116,64 @@ def _slugify_brand(brand_name: str) -> str:
     """Convert 'Entresto' -> 'entresto'; strip parenthetical indication notes."""
     base = brand_name.split("(")[0].strip()
     return base.lower().replace(" ", "-").replace("/", "-")
+
+
+FDA_OVERVIEW_TMPL = (
+    "https://www.accessdata.fda.gov/scripts/cder/daf/"
+    "index.cfm?event=overview.process&ApplNo={app_num}"
+)
+
+_REVIEW_SUFFIX_RE = re.compile(
+    r"/(?:drugsatfda_docs)/(?:nda|bla)/(\d{4})/"
+    r"(?P<app>\d+)Orig\d+s(?P<supp>\d{3})"
+    r"(?P<suffix>SumR|MedR|OtherR|MultidisciplineR)?\.pdf",
+    re.IGNORECASE,
+)
+
+
+def discover_fda_supplement_url_via_scrape(
+    application_number: str,
+    approval_year: int | None = None,
+    *,
+    fetch: callable = None,
+    head: callable = _head,
+) -> list[DiscoveredURL]:
+    """Scrape the Drugs@FDA overview page for all supplement review PDFs.
+
+    sNDA supplement numbers vary per approval and don't follow the
+    predictable ``Orig1s000`` pattern used by original NDAs. This helper
+    HTTP-GETs the overview page, extracts all PDF links that match a
+    review-filename shape, and returns them ordered by supplement
+    number. Caller filters by year/supplement to pick the right one.
+    """
+    import requests as _requests
+    fetch = fetch or (lambda url: _requests.get(
+        url, timeout=30,
+        headers={"User-Agent": "DossierGap URL discovery"},
+    ))
+    url = FDA_OVERVIEW_TMPL.format(app_num=application_number)
+    resp = fetch(url)
+    if getattr(resp, "status_code", 0) != 200:
+        return []
+    html = resp.text
+    results: list[DiscoveredURL] = []
+    seen: set[str] = set()
+    for m in _REVIEW_SUFFIX_RE.finditer(html):
+        candidate = m.group(0)
+        if candidate in seen:
+            continue
+        seen.add(candidate)
+        supp_num = int(m.group("supp"))
+        suffix = m.group("suffix") or "bare"
+        # Prepend protocol if the href was relative
+        if not candidate.startswith("http"):
+            candidate = "https://www.accessdata.fda.gov" + candidate
+        results.append(DiscoveredURL(
+            url=candidate,
+            status_code=200,
+            pattern_matched=f"s{supp_num:03d}/{suffix}",
+        ))
+    return results
 
 
 def discover_ema_epar_url(

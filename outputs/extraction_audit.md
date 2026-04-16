@@ -15,6 +15,7 @@
 | Phase 2 tasks 15+17 (2026-04-16) | 3 | + Verquvo VICTORIA correct N=5050 |
 | Phase 2 task 16 (2026-04-16) | 3 | Expanded outcome-pattern vocabulary (colon/table/outcome forms); no new rows. Uptravi/Verquvo outcome-text still noisy — their canonical 'was' form exists but points to subgroup/procedural text, and semantic-content scoring (attempted then reverted) regressed Uptravi. Acknowledged limitation. |
 | Phase 3 task 18 URL discovery + expanded corpus (2026-04-16) | 4 | + Savaysa EMA extracted (but NOISY — HR 0.87 / N=1,146 is a subgroup analysis; published ENGAGE AF-TIMI 48 primary is HR 0.79 / N=21,105). Phase 3 revealed that URL coverage ≠ extraction quality. 17 failures exposed: lipid-only BLAs (Praluent, Repatha, Leqvio) lack HR patterns (primary is LDL-C mean difference); OtherR structural issues remain for Nexletol/Kerendia/Inpefa; several EMAs use non-standard section numbering. |
+| Phase 4 task 21 sNDA URL scrape-discovery (2026-04-16) | 5 | + Farxiga DELIVER HFpEF sNDA extracted (NOISY — HR 0.88 / N=6,263 is the CV-death-alone secondary; published DELIVER primary composite is HR 0.82 / N=6,263 — N matches exactly). Wegovy SELECT sNDA URL discovered and section detected, but SELECT's FDA review reports HR in a format the current regex misses. sNDA URL pattern differs from NDA: supplement reviews use `{AppNo}Orig1s{NNN}.pdf` (bare, no MedR suffix) and supplement numbers don't follow a predictable sequence, requiring HTML-scrape discovery rather than pattern cycling. |
 
 ## Phase 3 URL-discovery outcome (Task 18)
 

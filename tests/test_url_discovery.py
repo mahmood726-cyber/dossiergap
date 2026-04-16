@@ -110,3 +110,45 @@ def test_ema_strips_parenthetical_indication():
 def test_ema_returns_none_when_nothing_matches():
     r = discover_ema_epar_url("NonexistentDrug", head=_fake_head({}))
     assert r is None
+
+
+# -- sNDA overview-scrape discovery (Phase 4) --------------------------------
+
+def test_scrape_extracts_supplement_review_urls():
+    from dossiergap.download.url_discovery import discover_fda_supplement_url_via_scrape
+
+    fake_html = """
+    <html><body>
+    Summary Review: <a href="/drugsatfda_docs/nda/2014/202293Orig1s000SumR.pdf">s000</a>
+    Supplement 18: <a href="/drugsatfda_docs/nda/2021/202293Orig1s018.pdf">s018</a>
+    Supplement 26: <a href="/drugsatfda_docs/nda/2023/202293Orig1s026.pdf">s026</a>
+    Approval letter (should NOT match): <a href="/drugsatfda_docs/nda/2021/202293Orig1s018ltr.pdf">ltr</a>
+    Label (should NOT match): <a href="/drugsatfda_docs/nda/2021/202293Orig1s018lbl.pdf">lbl</a>
+    </body></html>
+    """
+    class FakeResp:
+        status_code = 200
+        text = fake_html
+    results = discover_fda_supplement_url_via_scrape(
+        "202293", fetch=lambda url: FakeResp(),
+    )
+    patterns = [r.pattern_matched for r in results]
+    assert any("s000/SumR" in p for p in patterns)
+    assert any("s018/bare" in p for p in patterns)
+    assert any("s026/bare" in p for p in patterns)
+    # ltr / lbl suffixes must not appear — they are approval letters / labels
+    for p in patterns:
+        assert "ltr" not in p
+        assert "lbl" not in p
+
+
+def test_scrape_returns_empty_on_404():
+    from dossiergap.download.url_discovery import discover_fda_supplement_url_via_scrape
+
+    class NotFound:
+        status_code = 404
+        text = ""
+    results = discover_fda_supplement_url_via_scrape(
+        "999999", fetch=lambda url: NotFound(),
+    )
+    assert results == []
