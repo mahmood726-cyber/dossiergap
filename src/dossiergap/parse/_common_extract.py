@@ -106,6 +106,22 @@ _SCORE_ADJACENCY_WEIGHT = 100     # per-outcome-word weight in ±300 window
 _PREFIX_WINDOW = 200
 _ADJACENCY_WINDOW = 300
 
+# Task 16 completion: semantic scoring of primary-outcome TEXT candidates.
+# Unlike HR candidates (where the subject precedes the number), the outcome
+# text IS the subject — clinical-endpoint words should appear INSIDE the
+# captured span, and method/procedure words indicate the regex captured a
+# method-description sentence ('primary endpoint was performed on FAS')
+# instead of an endpoint definition.
+OUTCOME_METHOD_PENALTY_WORDS = frozenset([
+    "performed", "analyzed", "analysed", "based on",
+    "full analysis set", "per-protocol population", "per protocol population",
+    "intention-to-treat", "intention to treat",
+    "log-rank", "log rank", "stratified",
+])
+_OUTCOME_PRIMARY_WINDOW = 100     # window for primary-keyword in preceding text
+_OUTCOME_CLINICAL_WEIGHT = 100    # per clinical-endpoint word INSIDE capture
+_OUTCOME_METHOD_PENALTY = -300    # per method-word INSIDE capture
+
 
 def score_hr_candidate(text: str, match_start: int, match_end: int) -> int:
     """Score an HR candidate using directional context.
@@ -155,6 +171,66 @@ def rank_hr_candidates(
     # Stable sort descending by score; Python's sort is stable so equal-score
     # candidates retain their original order (= first-in-text wins on ties).
     scored.sort(key=lambda t: t[2], reverse=True)
+    return scored
+
+
+def score_outcome_candidate(
+    text: str,
+    match_start: int,
+    match_end: int,
+    captured: str,
+) -> int:
+    """Score a primary-outcome-TEXT candidate semantically.
+
+    Unlike HR candidates, the outcome text IS the subject: clinical-endpoint
+    vocabulary (death, mortality, hospitalisation, composite, MACE) should
+    appear INSIDE the captured span, and method/procedure vocabulary
+    (performed, analysed, Full Analysis Set, log-rank) indicates the regex
+    caught a method-description sentence instead.
+
+    Scoring:
+      - +500 if a primary-keyword appears in the 100 chars preceding the match
+        (stays within the primary-endpoint context, not just any 'primary' token)
+      - +100 per clinical-endpoint positive word INSIDE the captured span
+      - -300 per method/procedure word INSIDE the captured span
+
+    Higher score means 'more likely to be a real endpoint definition'.
+    Pure function — no mutation, no IO.
+    """
+    prefix = text[max(0, match_start - _OUTCOME_PRIMARY_WINDOW):match_start]
+    primary_bonus = _SCORE_PRIMARY_BONUS if PRIMARY_KEYWORD_RE.search(prefix) else 0
+
+    captured_lc = captured.lower()
+    clinical_hits = sum(1 for w in OUTCOME_POSITIVE_WORDS if w in captured_lc)
+    method_hits = sum(1 for w in OUTCOME_METHOD_PENALTY_WORDS if w in captured_lc)
+
+    return (
+        primary_bonus
+        + _OUTCOME_CLINICAL_WEIGHT * clinical_hits
+        + _OUTCOME_METHOD_PENALTY * method_hits
+    )
+
+
+def rank_outcome_candidates(
+    hits: list[tuple[int, re.Match[str]]],
+    pages: dict[int, str],
+) -> list[tuple[int, re.Match[str], int]]:
+    """Return hits annotated with scores, sorted highest-first.
+
+    Ties broken by SHORTEST captured text (Phase-1 behaviour: terser matches
+    are usually the endpoint definition, longer ones are narrative
+    continuations). When no semantic signal distinguishes candidates, this
+    preserves the pre-Task-16 outcome behaviour exactly.
+    """
+    scored: list[tuple[int, re.Match[str], int]] = []
+    for pnum, m in hits:
+        text = pages[pnum]
+        captured = m.group(1) if m.groups() else text[m.start():m.end()]
+        score = score_outcome_candidate(text, m.start(), m.end(), captured)
+        scored.append((pnum, m, score))
+    scored.sort(
+        key=lambda t: (-t[2], len(t[1].group(1) if t[1].groups() else "")),
+    )
     return scored
 
 
@@ -280,22 +356,29 @@ def extract_n_randomized(pages: dict[int, str]) -> tuple[int, int]:
 def extract_primary_outcome(pages: dict[int, str]) -> tuple[str, int]:
     """Extract the primary outcome/endpoint text.
 
-    Strategy (Task 16, refined after a failed earliest-match experiment):
-      1. Try canonical 'primary (composite) endpoint was X' — shortest match
-         wins (the canonical definition is usually the tersest phrasing;
-         longer matches tend to be narrative continuations).
+    Strategy (Task 16 semantic scoring, completes the partial
+    shortest-within-canonical shipped in 1bb2e2f):
+      1. Collect all canonical 'primary (composite) endpoint was X' hits.
+         Rank them by ``score_outcome_candidate`` (clinical-endpoint words
+         inside the capture reward the score; method/procedure words
+         penalise it; primary-keyword in preceding 100 chars adds a bonus).
+         Ties are broken by shortest captured text (Phase-1 behaviour).
       2. If the canonical pattern yields ZERO matches, try the alternative
          patterns (colon form, table-style 'Time to', 'Primary outcome:')
          in order and return the earliest match from the first hit.
 
-    The 'earliest across all patterns' strategy was tried and regressed
-    Uptravi to method-description text ('...performed on the Full Analysis
-    Set...'). Shortest-within-canonical preserves Phase 1 behaviour for
-    Entresto and doesn't degrade the others.
+    Prior strategy ('earliest across all patterns') was reverted because it
+    regressed Uptravi to '...performed on the Full Analysis Set...'.
+    Shortest-within-canonical preserved Phase 1 behaviour but didn't fix
+    Uptravi either. Semantic scoring (this version) completes Task 16's
+    original intent — the commit message for 1bb2e2f explicitly proposed
+    'prefer matches containing death/mortality/hospitalization over matches
+    containing performed/analyzed/based on'.
     """
     canonical_hits = find_all(PRIMARY_OUTCOME_RE, pages)
     if canonical_hits:
-        pnum, m = min(canonical_hits, key=lambda h: len(h[1].group(1)))
+        ranked = rank_outcome_candidates(canonical_hits, pages)
+        pnum, m, _score = ranked[0]
         text = " ".join(m.group(1).split())
         return text, pnum
 

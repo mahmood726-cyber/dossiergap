@@ -44,6 +44,12 @@ Non-goals (Phase 3): URL-discovery helpers (Task 3.5/4.5), cross-drug batching, 
 
 **Tests**: synthetic pages with subgroup-before-primary ordering; Entresto regression guard (HR 0.80 should still win).
 
+**Status (2026-04-16)**: DONE. Delivered in two commits:
+- `1bb2e2f` (partial): fallback-pattern expansion (colon/table-style/outcome form). Deferred semantic scoring to Phase 3 after pure-proximity experiment regressed Uptravi.
+- Task-16-completion commit: semantic content scoring per the partial commit's own proposal. `score_outcome_candidate` in `_common_extract.py` rewards clinical-endpoint vocabulary (death/mortality/hospitali/mace/composite) inside the capture, penalises method vocabulary (performed/analysed/FAS/per-protocol/log-rank) inside the capture, and adds a primary-keyword proximity bonus. `rank_outcome_candidates` sorts by score with shortest-captured tie-break (preserves Phase-1 behaviour on no-signal). `extract_primary_outcome` now delegates to the ranker. The HR-candidate half of the original design was covered by Task 19 (FDA narrative `score_hr_candidate`).
+- Tests: `tests/test_outcome_scoring.py` (10 tests — 5 pure-fn, 2 ranker, 3 integration) + existing Entresto regression tests in `test_parse_fda_trials.py` continue to assert `"cardiovascular death" in primary_outcome.lower()` on the real PDF.
+- Full suite: 228/228 pass, 0 regressions.
+
 ### Task 17 — N context scoring (disposition-table aware)
 
 **Why**: Verquvo extraction currently fails because `Not Randomized 1,807` is rejected (Phase 1 fix) but no other N pattern exists in the efficacy section. The real N=5,050 appears in the disposition-table row: `Subjects in population 2,526 2,524 5,050`. Need a second N pattern.
