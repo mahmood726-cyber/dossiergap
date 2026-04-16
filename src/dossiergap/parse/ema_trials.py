@@ -61,16 +61,26 @@ _HR_CI_NARRATIVE_RE = re.compile(
 
 
 def _extract_hr_ci(pages: dict[int, str]) -> tuple[float, float, float, int]:
-    # Prefer table format (primary result in EMA EPAR).
-    hits = find_all(_HR_CI_TABLE_RE, pages)
-    if hits:
-        pnum, m = hits[0]
+    """Phase-2 behaviour preserved on EMA: table-tier first-match, narrative
+    fallback first-match. Semantic scoring (§4.3) is NOT applied here
+    because EMA EPARs have a failure mode the scoring cannot distinguish:
+    later discussion pages often cite historical comparator trials using
+    'primary endpoint' language, and the preceding context for a compact
+    primary-result narrative sentence does not. In Verquvo specifically,
+    p.97 cites PARADIGM-HF's HR=0.80 as a comparator and scores higher
+    than Verquvo's own VICTORIA primary HR=0.90 at p.78. Scoring is
+    deferred to FDA narrative extraction (``fda_trials._extract_hr_ci``)
+    where the subject of the HR is reliably established in the preceding
+    200 chars.
+    """
+    table_hits = find_all(_HR_CI_TABLE_RE, pages)
+    if table_hits:
+        pnum, m = table_hits[0]
         return float(m.group(1)), float(m.group(2)), float(m.group(3)), pnum
 
-    # Fall back to narrative HR.
-    hits = find_all(_HR_CI_NARRATIVE_RE, pages)
-    if hits:
-        pnum, m = hits[0]
+    narrative_hits = find_all(_HR_CI_NARRATIVE_RE, pages)
+    if narrative_hits:
+        pnum, m = narrative_hits[0]
         return float(m.group(1)), float(m.group(2)), float(m.group(3)), pnum
 
     raise ExtractionError(

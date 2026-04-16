@@ -33,6 +33,7 @@ from ._common_extract import (
     extract_trial_name,
     find_all,
     is_strict_pivotal,
+    rank_hr_candidates,
 )
 
 # FDA narrative format. Accepts 90/95/97.5/99 % CI — some FDA reviews
@@ -50,13 +51,19 @@ _HR_CI_RE = re.compile(
 
 
 def _extract_hr_ci(pages: dict[int, str]) -> tuple[float, float, float, int]:
+    """Semantic-scored extraction: collect all HR candidates, rank by
+    primary-keyword proximity and outcome-word adjacency, return top.
+    Stable-sort tie-breaker preserves Phase-1 'first match wins' when
+    no signal distinguishes candidates.
+    """
     hits = find_all(_HR_CI_RE, pages)
     if not hits:
         raise ExtractionError(
             "could not extract effect estimate: no match for "
             "'HR <point>; 95% CI <low>, <high>' pattern in efficacy section"
         )
-    pnum, m = hits[0]  # first HR in FDA narrative = primary result
+    ranked = rank_hr_candidates(hits, pages)
+    pnum, m, _score = ranked[0]
     return float(m.group(1)), float(m.group(2)), float(m.group(3)), pnum
 
 

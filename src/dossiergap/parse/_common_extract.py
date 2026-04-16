@@ -80,6 +80,83 @@ PHASE_RE = re.compile(r"\bPhase\s+(2/3|3b|[234])\b", re.IGNORECASE)
 
 PIVOTAL_WINDOW = 200
 
+# Semantic-scoring constants for HR-candidate ranking (methods-paper §4.3).
+PRIMARY_KEYWORD_RE = re.compile(
+    r"\bprimary\s+(?:composite\s+)?(?:endpoint|outcome|efficacy|analysis|comparison)\b",
+    re.IGNORECASE,
+)
+_SUBGROUP_PREFIX_RE = re.compile(
+    r"\b(?:subgroup|sensitivity|exploratory|per[\s-]protocol"
+    r"|post[\s-]?hoc|ad[\s-]?hoc)\b",
+    re.IGNORECASE,
+)
+OUTCOME_POSITIVE_WORDS = frozenset([
+    "death", "mortality", "hospitali",  # "hospitali" catches hospitalisation/hospitalization
+    "mace", "infarction", "stroke", "composite",
+])
+OUTCOME_NEGATIVE_WORDS = frozenset([
+    "subgroup", "sensitivity", "exploratory",
+    "per-protocol", "per protocol", "post-hoc", "post hoc",
+    "ad-hoc", "ad hoc",
+])
+
+_SCORE_PRIMARY_BONUS = 500        # primary-keyword in preceding 200 chars
+_SCORE_SUBGROUP_PENALTY = -1000   # subgroup-keyword in preceding 200 chars
+_SCORE_ADJACENCY_WEIGHT = 100     # per-outcome-word weight in ±300 window
+_PREFIX_WINDOW = 200
+_ADJACENCY_WINDOW = 300
+
+
+def score_hr_candidate(text: str, match_start: int, match_end: int) -> int:
+    """Score an HR candidate using directional context.
+
+    The subject of a reported hazard ratio is established *before* the
+    HR in natural-language text ('The primary endpoint was X. HR 0.80...'
+    or 'Subgroup analysis: HR 0.75...'). Scoring therefore checks the
+    PRECEDING 200 chars for:
+      - primary-endpoint keyword (strong bonus +500),
+      - subgroup/sensitivity/post-hoc marker (strong penalty -1000),
+    plus a bidirectional ±300 outcome-word adjacency signal that
+    rewards death/mortality/hospitalisation/MACE proximity and
+    penalises subgroup-discussion vocabulary.
+
+    Higher score means 'more likely to be the primary-endpoint HR'.
+    Pure function — no mutation, no IO.
+    """
+    prefix = text[max(0, match_start - _PREFIX_WINDOW):match_start]
+    primary_bonus = _SCORE_PRIMARY_BONUS if PRIMARY_KEYWORD_RE.search(prefix) else 0
+    subgroup_penalty = _SCORE_SUBGROUP_PENALTY if _SUBGROUP_PREFIX_RE.search(prefix) else 0
+
+    window_start = max(0, match_start - _ADJACENCY_WINDOW)
+    window_end = min(len(text), match_end + _ADJACENCY_WINDOW)
+    window = text[window_start:window_end].lower()
+    pos = sum(1 for w in OUTCOME_POSITIVE_WORDS if w in window)
+    neg = sum(1 for w in OUTCOME_NEGATIVE_WORDS if w in window)
+    adjacency_score = _SCORE_ADJACENCY_WEIGHT * (pos - neg)
+
+    return primary_bonus + subgroup_penalty + adjacency_score
+
+
+def rank_hr_candidates(
+    hits: list[tuple[int, re.Match[str]]],
+    pages: dict[int, str],
+) -> list[tuple[int, re.Match[str], int]]:
+    """Return hits annotated with scores, sorted highest-first.
+
+    Stable sort preserves Phase-1 tie-breaker behaviour ('first in text wins')
+    when two candidates score identically — important so Entresto and Verquvo
+    regression tests still pass when no signal distinguishes candidates.
+    """
+    scored: list[tuple[int, re.Match[str], int]] = []
+    for idx, (pnum, m) in enumerate(hits):
+        text = pages[pnum]
+        score = score_hr_candidate(text, m.start(), m.end())
+        scored.append((pnum, m, score))
+    # Stable sort descending by score; Python's sort is stable so equal-score
+    # candidates retain their original order (= first-in-text wins on ties).
+    scored.sort(key=lambda t: t[2], reverse=True)
+    return scored
+
 
 def find_all(pattern: re.Pattern[str], pages: dict[int, str]) -> list[tuple[int, re.Match[str]]]:
     hits: list[tuple[int, re.Match[str]]] = []
