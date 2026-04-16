@@ -131,6 +131,40 @@ _REVIEW_SUFFIX_RE = re.compile(
 )
 
 
+FDA_APPLETTER_BASE = "https://www.accessdata.fda.gov/drugsatfda_docs/appletter"
+
+
+# Indication keyword → label mapping. Keys appear in FDA supplement approval
+# letters; labels match the `cv_indication` field in the corpus.
+_INDICATION_KEYWORD_MAP = (
+    ("heart failure (nyha", "HFrEF"),        # DAPA-HF NYHA II-IV w/ reduced EF
+    ("reduced ejection fraction", "HFrEF"),
+    ("hfref", "HFrEF"),
+    ("preserved ejection fraction", "HFpEF"),
+    ("hfpef", "HFpEF"),
+    ("obstructive hypertrophic cardiomyopathy", "Obstructive HCM"),
+    ("chronic kidney disease", "CKD"),
+    ("cardiovascular death in adults with type", "CV risk (T2D)"),
+    ("atrial fibrillation", "AF"),
+    ("transthyretin amyloid cardiomyopathy", "ATTR-CM"),
+    ("cardiovascular risk", "CV risk reduction"),
+    ("major adverse cardiovascular events", "CV risk reduction"),
+    ("pulmonary arterial hypertension", "PAH"),
+)
+
+
+def classify_letter_indication(letter_text: str) -> str | None:
+    """Match an FDA approval-letter's first-page text against the indication
+    keyword map and return the first label that matches (None if no match).
+    Case-insensitive substring match.
+    """
+    lowered = letter_text.lower()
+    for keyword, label in _INDICATION_KEYWORD_MAP:
+        if keyword in lowered:
+            return label
+    return None
+
+
 def discover_fda_supplement_url_via_scrape(
     application_number: str,
     approval_year: int | None = None,

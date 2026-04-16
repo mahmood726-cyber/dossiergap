@@ -109,7 +109,7 @@
     "ema_procedure_number": "EMEA/H/C/002322",
     "ema_approval_date": "2020-11-13",
     "cv_indication": "HFrEF",
-    "notes": "sNDA to 202293 (original diabetes NDA 2014). DAPA-HF pivotal. Separate corpus entry from diabetes original approval. FDA URL still unknown — s018 (2021) probe returned DELIVER data on extraction (merged with HFpEF row), so s018 is not the DAPA-HF supplement. Supplement-number-to-indication mapping requires per-drug verification."
+    "notes": "sNDA to 202293. DAPA-HF pivotal. Phase 5: s020 confirmed DAPA-HF approval via appletter text ('NYHA class II-IV with reduced ejection fraction'), but extracting from /nda/2021/202293Orig1s020.pdf returns DELIVER values (N=6,263 HR 0.88) not DAPA-HF values (N=4,744 HR 0.74). The 192-page summary review contains both-trial references, so extraction needs trial-name targeting before this URL can be safely seeded. URL withheld until extractor can disambiguate."
   },
   {
     "drug_inn": "empagliflozin",

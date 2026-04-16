@@ -18,6 +18,19 @@
 | Phase 4 task 21 sNDA URL scrape-discovery (2026-04-16) | 5 | + Farxiga DELIVER HFpEF sNDA extracted (NOISY — HR 0.88 / N=6,263 is the CV-death-alone secondary; published DELIVER primary composite is HR 0.82 / N=6,263 — N matches exactly). Wegovy SELECT sNDA URL discovered and section detected, but SELECT's FDA review reports HR in a format the current regex misses. sNDA URL pattern differs from NDA: supplement reviews use `{AppNo}Orig1s{NNN}.pdf` (bare, no MedR suffix) and supplement numbers don't follow a predictable sequence, requiring HTML-scrape discovery rather than pattern cycling. |
 | Phase 4 sNDA probe extension (2026-04-16, reverted) | 5 | Additional sNDA supplement-number guesses for DAPA-HF (s018), EMPEROR-Reduced (s008), EMPEROR-Preserved (s033) all produced extraction failures OR cross-indication data leakage. Specifically, probing Farxiga s018 returned DELIVER-identical data (merged into the Farxiga HFpEF row via composite dedup by N=6,263), revealing that supplement numbers do not correlate with approval chronology and that probed URLs need per-indication verification against the Drugs@FDA approval-history page before being accepted. Speculative URLs reverted; corpus returns to the verified set (s026 Farxiga DELIVER only). Phase 4 finding: scrape-discovery is valid and tested, but **supplement-to-indication mapping requires manual verification** — scraping alone isn't enough. |
 
+## Phase 5 finding: appletter indication mapping works, extraction still contaminated
+
+**Method**: Added `classify_letter_indication()` helper that parses an FDA supplement approval-letter PDF's first page for indication keywords (HFrEF / HFpEF / ATTR-CM / HCM / CV risk / PAH / AF / CKD). 6 unit tests pass.
+
+**Case study — Farxiga s020 DAPA-HF verification**:
+- Probed `appletter/2020/202293Orig1s020ltr.pdf` → first-page text contained: *"reduce the risk of cardiovascular death and hospitalization for heart failure in adults with heart failure (NYHA class II-IV) with reduced ejection fraction"*.
+- Classifier correctly returned `"HFrEF"` → s020 unambiguously identified as the DAPA-HF approval supplement (2020-05-05).
+- Seeded `nda/2021/202293Orig1s020.pdf` as Farxiga HFrEF URL and re-ran Task 14.
+- **Result**: extraction returned N=6,263 HR 0.88 — matching DELIVER (the s026 HFpEF supplement), not DAPA-HF (published N=4,744 HR 0.74). Grep of the 192-page s020 PDF confirms both DAPA-HF and DELIVER are referenced in the document, and the trial-name cluster detector picks whichever has higher density on the page.
+- **Conclusion**: URL-to-indication mapping is solved (classifier works); extraction from within a correctly-identified supplement review is not. A single summary-review PDF can contain multiple trial references (prior-approval comparators, later-added subgroup analyses, etc.), and the current extractor has no mechanism to restrict to the target trial. Phase 6 would need a trial-name-gated section detector that locates the cluster matching the corpus entry's target trial acronym (DAPA-HF, DELIVER, EMPEROR-Reduced, etc.) rather than the densest cluster overall.
+
+**Corpus state after Phase 5**: s020 URL withheld from Farxiga HFrEF entry to avoid the cross-trial dedup collision observed in testing. Classifier code retained at `src/dossiergap/download/url_discovery.py::classify_letter_indication` for Phase 6 use.
+
 ## Phase 4 conclusions
 
 - **sNDA scrape discovery works** but requires a second verification step per supplement. The `{AppNo}Orig1s{NNN}.pdf` filename doesn't encode which indication the supplement serves. Without that mapping, speculative URLs can silently corrupt the corpus via dedup merging (the Farxiga s018 cross-indication leak was caught only because the dedup_conflicts column surfaced both HFrEF and HFpEF sponsor names on the same row).
