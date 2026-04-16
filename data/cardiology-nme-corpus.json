@@ -109,7 +109,7 @@
     "ema_procedure_number": "EMEA/H/C/002322",
     "ema_approval_date": "2020-11-13",
     "cv_indication": "HFrEF",
-    "notes": "sNDA to 202293 (original diabetes NDA 2014). DAPA-HF pivotal. Separate corpus entry from diabetes original approval."
+    "notes": "sNDA to 202293 (original diabetes NDA 2014). DAPA-HF pivotal. Separate corpus entry from diabetes original approval. FDA URL still unknown — s018 (2021) probe returned DELIVER data on extraction (merged with HFpEF row), so s018 is not the DAPA-HF supplement. Supplement-number-to-indication mapping requires per-drug verification."
   },
   {
     "drug_inn": "empagliflozin",
@@ -120,7 +120,7 @@
     "ema_procedure_number": "EMEA/H/C/002677",
     "ema_approval_date": "2021-06-28",
     "cv_indication": "HFrEF",
-    "notes": "sNDA to 204629. EMPEROR-Reduced pivotal."
+    "notes": "sNDA to 204629. EMPEROR-Reduced pivotal. FDA URL: Phase 4 Jardiance supplement probes s001–s008 (all 2021-dated) all failed extraction; supplement-to-indication mapping requires manual verification via the Drugs@FDA approval-history page."
   },
   {
     "drug_inn": "inclisiran",
@@ -181,7 +181,7 @@
     "ema_procedure_number": "EMEA/H/C/002677",
     "ema_approval_date": null,
     "cv_indication": "HFpEF",
-    "notes": "sNDA to 204629 for HFpEF indication. EMPEROR-Preserved pivotal. Distinct corpus entry from HFrEF sNDA. URLs seeded via Phase 3 URL discovery 2026-04-16.",
+    "notes": "sNDA to 204629 for HFpEF indication. EMPEROR-Preserved pivotal. Distinct corpus entry from HFrEF sNDA. Phase 4 s033 probe failed extraction; same verification gap as HFrEF.",
     "ema_epar_url": "https://www.ema.europa.eu/en/documents/assessment-report/jardiance-epar-public-assessment-report_en.pdf"
   },
   {
