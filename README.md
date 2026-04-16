@@ -11,8 +11,15 @@ Cardiology NME dossier pivotal-trial publication-gap audit. FDA Drugs@FDA + EMA 
 ## Locked decisions
 
 - `PHASE1-PLAN.md` — execution plan, 15 tasks, TDD.
+- `PHASE2-PLAN.md` — Phase 2 P0 blockers.
 - `docs/corpus-criteria.md` — included/excluded CV sub-indications and product types.
 - `docs/pivotal-criterion.md` — strict (primary) + inclusive (sensitivity) operational definition.
+
+## Manuscripts
+
+- `manuscript/e156.md` — 156-word *Synthesis* submission draft (7 sentences).
+- `manuscript/methods-paper.md` — full methods-paper draft targeting *Research Synthesis Methods* / *BMJ Open* / *JOSS*.
+- `outputs/extraction_audit.md` — honest audit of extraction results per drug, with ground-truth comparisons.
 
 ## Preflight
 
