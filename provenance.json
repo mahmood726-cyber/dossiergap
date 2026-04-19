@@ -1,0 +1,57 @@
+{
+  "entries": {
+    "GRIPHON": {
+      "commit_sha": "bac0f34c710cb42ffab06ffc644ff4f14a07f4eb",
+      "extracted_at": "2026-04-19T21:22:10Z",
+      "extractor": "dossiergap-v0.2.0-extractor",
+      "identifier": "GRIPHON",
+      "kind": "other",
+      "source": "outputs/extraction_audit.md:Uptravi/selexipag (secondary endpoint)",
+      "values": {
+        "HR": 0.67,
+        "HR_type": "secondary",
+        "N": 1150,
+        "drug": "selexipag",
+        "nct": "NCT01106014",
+        "trial_acronym": "GRIPHON"
+      },
+      "verified": true,
+      "verified_at": "2026-04-19T21:22:10Z"
+    },
+    "PARADIGM-HF": {
+      "commit_sha": "bac0f34c710cb42ffab06ffc644ff4f14a07f4eb",
+      "extracted_at": "2026-04-19T21:22:10Z",
+      "extractor": "dossiergap-v0.2.0-extractor",
+      "identifier": "PARADIGM-HF",
+      "kind": "other",
+      "source": "outputs/extraction_audit.md:Entresto/sacubitril-valsartan",
+      "values": {
+        "HR": 0.8,
+        "N": 8442,
+        "drug": "sacubitril_valsartan",
+        "nct": "NCT01035255",
+        "trial_acronym": "PARADIGM-HF"
+      },
+      "verified": true,
+      "verified_at": "2026-04-19T21:22:10Z"
+    },
+    "VICTORIA": {
+      "commit_sha": "bac0f34c710cb42ffab06ffc644ff4f14a07f4eb",
+      "extracted_at": "2026-04-19T21:22:10Z",
+      "extractor": "dossiergap-v0.2.0-extractor",
+      "identifier": "VICTORIA",
+      "kind": "other",
+      "source": "outputs/extraction_audit.md:Verquvo/vericiguat",
+      "values": {
+        "HR": 0.9,
+        "N": 5050,
+        "drug": "vericiguat",
+        "nct": "NCT02861534",
+        "trial_acronym": "VICTORIA"
+      },
+      "verified": true,
+      "verified_at": "2026-04-19T21:22:10Z"
+    }
+  },
+  "schema_version": "0.1"
+}
