@@ -36,6 +36,7 @@ class CorpusEntry(BaseModel):
     cv_indication: str = Field(min_length=2)
     fda_medical_review_url: str | None = None  # hand-seeded until Task 3.5 URL discovery
     ema_epar_url: str | None = None            # hand-seeded until Task 4.5 URL discovery
+    pivotal_trial_name: str | None = None      # Phase 6: target trial acronym for section detection
     notes: str = ""
 
     @field_validator("fda_application_number")
